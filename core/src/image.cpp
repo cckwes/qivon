@@ -3,6 +3,12 @@
 using namespace qivon;
 
 template <class T>
+Image<T>::Image()
+        : m_width(0), m_height(0), m_channels(0)
+{
+}
+
+template <class T>
 Image<T>::Image(int width, int height, int channels)
         : m_width(0), m_height(0), m_channels(0)
 {

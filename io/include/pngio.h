@@ -5,7 +5,7 @@
 #include <image.h>
 
 namespace qivon {
-
+    Image<unsigned char> readPngFile(const std::string &filename);
 }       //namespace qivon
 
 #endif //QIVON_PNGIO_H

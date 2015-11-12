@@ -8,8 +8,8 @@ namespace qivon {
     template <class T>
     class Image {
     public:
+        Image();
         Image(int width, int height, int channels);
-
         Image(int width, int height, int channels, T* data);
 
         //copy constructor
