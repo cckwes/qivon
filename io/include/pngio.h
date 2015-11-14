@@ -2,6 +2,7 @@
 #define QIVON_PNGIO_H
 
 #include "qivon_config.h"
+
 #include <png.h>
 #include <image.h>
 
