@@ -3,10 +3,12 @@
 
 #include <memory>
 
+#include "qivon_config.h"
+
 namespace qivon {
 
     template <class T>
-    class Image {
+    class QIVON_EXPORT Image {
     public:
         Image();
         Image(int width, int height, int channels);
