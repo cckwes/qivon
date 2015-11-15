@@ -106,6 +106,17 @@ namespace qivon {
         free(row_pointers);
 
         png_destroy_read_struct(&png_ptr, NULL, NULL);
-        return Image<unsigned char>();
+
+        if (color_type == PNG_COLOR_TYPE_RGB)
+            return Image<unsigned char>(width, height, 3, image_data);
+        else if (color_type == PNG_COLOR_TYPE_RGBA)
+            return Image<unsigned char>(width, height, 4, image_data);
+        else
+            return Image<unsigned char>();
+    }
+
+    bool writePngFile(const std::string &filename, Image<unsigned char> &image)
+    {
+        return true;
     }
 }       //namespace qivon
