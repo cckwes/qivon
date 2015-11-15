@@ -7,9 +7,9 @@
 #include <image.h>
 
 namespace qivon {
-    QIVON_EXPORT Image<unsigned char> readPngFile(const std::string &filename);
+QIVON_EXPORT Image<unsigned char> readPngFile(const std::string &filename);
 
-    QIVON_EXPORT bool writePngFile(const std::string &filename, Image<unsigned char> &image);
+QIVON_EXPORT bool writePngFile(const std::string &filename, Image<unsigned char> &image);
 }       //namespace qivon
 
 #endif //QIVON_PNGIO_H

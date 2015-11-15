@@ -10,8 +10,14 @@ endif()
 include_directories(${qivon_io_SOURCE_DIR}/include)
 include_directories(${qivon_SOURCE_DIR}/core/include)
 
-set(SOURCES src/pngio.cpp)
-set(HEADERS include/pngio.h)
+set(SOURCES
+        src/pngio.cpp
+        src/jpgio.cpp
+        )
+set(HEADERS
+        include/pngio.h
+        include/jpgio.h
+        )
 
 find_package(PNG REQUIRED)
 if (APPLE)
@@ -20,4 +26,4 @@ endif()
 
 add_library(qivon_io SHARED ${SOURCES} ${HEADERS})
 target_link_libraries(qivon_io qivon_core)
-target_link_libraries(qivon_io ${PNG_LIBRARY})
+target_link_libraries(qivon_io ${PNG_LIBRARY} turbojpeg)

@@ -7,32 +7,32 @@
 
 namespace qivon {
 
-    template <class T>
-    class QIVON_EXPORT Image {
-    public:
-        Image();
-        Image(int width, int height, int channels);
-        Image(int width, int height, int channels, T* data);
+template<class T>
+class QIVON_EXPORT Image {
+ public:
+  Image();
+  Image(int width, int height, int channels);
+  Image(int width, int height, int channels, T *data);
 
-        //copy constructor
-        Image(const Image &img);
+  //copy constructor
+  Image(const Image &img);
 
-        //default destructor
-        ~Image();
+  //default destructor
+  ~Image();
 
-        bool isEmpty();
+  bool isEmpty();
 
-        inline int width() const {return m_width;}
-        inline int height() const {return m_height;}
-        inline int channels() const {return m_channels;}
-        inline T* data() const {return m_data.get();}
-        inline std::shared_ptr<T> data_ptr() const {return m_data;}
+  inline int width() const { return m_width; }
+  inline int height() const { return m_height; }
+  inline int channels() const { return m_channels; }
+  inline T *data() const { return m_data.get(); }
+  inline std::shared_ptr<T> data_ptr() const { return m_data; }
 
-    private:
-        int m_width, m_height;
-        int m_channels;
-        std::shared_ptr<T> m_data;
-    };
+ private:
+  int m_width, m_height;
+  int m_channels;
+  std::shared_ptr<T> m_data;
+};
 
 }   //namespace qivon
 
