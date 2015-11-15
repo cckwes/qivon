@@ -117,6 +117,133 @@ namespace qivon {
 
     bool writePngFile(const std::string &filename, Image<unsigned char> &image)
     {
+        FILE *fp = fopen(filename.c_str(), "wb");
+
+        if (!fp)
+        {
+            std::cerr << "Error open " << filename << " for png exporting" << std::endl;
+            return false;
+        }
+
+        if (image.isEmpty())
+        {
+            std::cerr << "Empty image, not exporting\n";
+            return false;
+        }
+
+        if (image.channels() != 3 && image.channels() != 4)
+        {
+            std::cerr << "Can only output image with 3 or 4 channels\n";
+            return false;
+        }
+
+        png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+        if (!png_ptr)
+        {
+            std::cerr << "png_create_write_struct failed\n";
+            return false;
+        }
+
+        png_infop info_ptr = png_create_info_struct(png_ptr);
+        if (!info_ptr)
+        {
+            std::cerr << "png_create_info_struct failed\n";
+            png_destroy_write_struct(&png_ptr, NULL);
+            return false;
+        }
+
+        if (setjmp(png_jmpbuf(png_ptr)))
+        {
+            std::cerr << "Io init error when exporting png\n";
+            png_destroy_write_struct(&png_ptr, NULL);
+            return false;
+        }
+
+        png_init_io(png_ptr, fp);
+
+        if (setjmp(png_jmpbuf(png_ptr)))
+        {
+            std::cerr << "Error when writing header\n";
+            png_destroy_write_struct(&png_ptr, NULL);
+            return false;
+        }
+
+        if (image.channels() == 3)
+        {
+            png_set_IHDR(png_ptr, info_ptr,
+                         image.width(), image.height(),
+                         8, PNG_COLOR_TYPE_RGB,
+                         PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
+                         PNG_FILTER_TYPE_BASE);
+        }
+        else if (image.channels() == 4)
+        {
+            png_set_IHDR(png_ptr, info_ptr,
+                         image.width(), image.height(),
+                         8, PNG_COLOR_TYPE_RGBA,
+                         PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
+                         PNG_FILTER_TYPE_BASE);
+        }
+
+        png_write_info(png_ptr, info_ptr);
+
+        if (setjmp(png_jmpbuf(png_ptr)))
+        {
+            std::cerr << "Error when writing bytes\n";
+            png_destroy_write_struct(&png_ptr, NULL);
+            return false;
+        }
+
+        unsigned char *image_data = image.data();
+
+        int width = image.width();
+        int height = image.height();
+
+        png_bytep  *row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * height);
+
+        size_t row_bytes = image.channels() * width;
+
+        for (int y = 0; y < height; ++y)
+        {
+            row_pointers[y] = (png_byte*) malloc(row_bytes);
+            png_byte *row = row_pointers[y];
+
+            for (int x = 0; x < width; ++x)
+            {
+                if (image.channels() == 3)
+                {
+                    row[3 * x] = image_data[y * row_bytes + 3 * x];
+                    row[3 * x + 1] = image_data[y * row_bytes + 3 * x + 1];
+                    row[3 * x + 2] = image_data[y * row_bytes + 3 * x + 2];
+                }
+                else if (image.channels() == 4)
+                {
+                    row[4 * x] = image_data[y * row_bytes + 4 * x];
+                    row[4 * x + 1] = image_data[y * row_bytes + 4 * x + 1];
+                    row[4 * x + 2] = image_data[y * row_bytes + 4 * x + 2];
+                    row[4 * x + 3] = image_data[y * row_bytes + 4 * x + 3];
+                }
+            }
+        }
+
+        png_write_image(png_ptr, row_pointers);
+
+        if (setjmp(png_jmpbuf(png_ptr)))
+        {
+            std::cerr << "Error during end of write\n";
+            png_destroy_write_struct(&png_ptr, NULL);
+            return false;
+        }
+
+        png_write_end(png_ptr, NULL);
+
+        //cleanup
+        for (int y = 0; y < height; ++y)
+            free(row_pointers[y]);
+        free(row_pointers);
+
+        png_destroy_write_struct(&png_ptr, NULL);
+
         return true;
     }
 }       //namespace qivon

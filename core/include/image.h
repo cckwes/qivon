@@ -20,6 +20,7 @@ namespace qivon {
         //default destructor
         ~Image();
 
+        bool isEmpty();
 
         inline int width() const {return m_width;}
         inline int height() const {return m_height;}
