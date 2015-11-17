@@ -3,7 +3,6 @@
 
 #include "qivon_config.h"
 
-#include <turbojpeg.h>
 #include <image.h>
 
 namespace qivon {

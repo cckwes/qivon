@@ -124,6 +124,8 @@ bool writeJpgFile(const std::string &filename, Image<unsigned char> &image) {
     std::cerr << "Error open " << filename << " for jpg exporting\n";
     return false;
   }
+
+  return true;
 }
 
 }       //namespace qivon

@@ -20,10 +20,13 @@ set(HEADERS
         )
 
 find_package(PNG REQUIRED)
+find_package(JPEG REQUIRED)
+
 if (APPLE)
     include_directories(${PNG_INCLUDE_DIR})
+    include_directories(${JPEG_INCLUDE_DIR})
 endif()
 
 add_library(qivon_io SHARED ${SOURCES} ${HEADERS})
 target_link_libraries(qivon_io qivon_core)
-target_link_libraries(qivon_io ${PNG_LIBRARY} jpeg)
+target_link_libraries(qivon_io ${PNG_LIBRARY} ${JPEG_LIBRARY})
