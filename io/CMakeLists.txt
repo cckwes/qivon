@@ -26,4 +26,4 @@ endif()
 
 add_library(qivon_io SHARED ${SOURCES} ${HEADERS})
 target_link_libraries(qivon_io qivon_core)
-target_link_libraries(qivon_io ${PNG_LIBRARY} turbojpeg)
+target_link_libraries(qivon_io ${PNG_LIBRARY} jpeg)

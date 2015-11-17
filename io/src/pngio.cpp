@@ -116,13 +116,6 @@ Image<unsigned char> readPngFile(const std::string &filename) {
 }
 
 bool writePngFile(const std::string &filename, Image<unsigned char> &image) {
-  FILE *fp = fopen(filename.c_str(), "wb");
-
-  if (!fp) {
-    std::cerr << "Error open " << filename << " for png exporting" << std::endl;
-    return false;
-  }
-
   if (image.isEmpty()) {
     std::cerr << "Empty image, not exporting\n";
     return false;
@@ -130,6 +123,13 @@ bool writePngFile(const std::string &filename, Image<unsigned char> &image) {
 
   if (image.channels() != 3 && image.channels() != 4) {
     std::cerr << "Can only output image with 3 or 4 channels\n";
+    return false;
+  }
+
+  FILE *fp = fopen(filename.c_str(), "wb");
+
+  if (!fp) {
+    std::cerr << "Error open " << filename << " for png exporting" << std::endl;
     return false;
   }
 
