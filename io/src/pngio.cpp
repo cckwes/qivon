@@ -1,4 +1,5 @@
 #include <iostream>
+#include <png.h>
 
 #include "pngio.h"
 

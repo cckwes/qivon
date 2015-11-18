@@ -3,7 +3,6 @@
 
 #include "qivon_config.h"
 
-#include <png.h>
 #include <image.h>
 
 namespace qivon {
