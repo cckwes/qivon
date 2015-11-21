@@ -7,8 +7,7 @@
 
 namespace qivon {
 
-template <class T>
-QIVON_EXPORT void toGrayscale(Image<T> &_src, Image<T> &_dst);
+QIVON_EXPORT void toGrayscale(Image<unsigned char> &_src, Image<unsigned char> &_dst);
 
 }
 

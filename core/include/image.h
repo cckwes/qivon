@@ -7,6 +7,14 @@
 
 namespace qivon {
 
+enum ColorType {
+  Type_Invalid = -1,
+  Type_Grayscale = 0,
+  Type_RGB = 1,
+  Type_BGR = 2,
+  Type_RGBA = 3
+};
+
 template<class T>
 class QIVON_EXPORT Image {
  public:
@@ -25,12 +33,16 @@ class QIVON_EXPORT Image {
   inline int width() const { return m_width; }
   inline int height() const { return m_height; }
   inline int channels() const { return m_channels; }
+  inline ColorType color() const {return m_colorType; }
   inline T *data() const { return m_data.get(); }
   inline std::shared_ptr<T> data_ptr() const { return m_data; }
+
+  void setColorType(ColorType _type);
 
  private:
   int m_width, m_height;
   int m_channels;
+  ColorType m_colorType;
   std::shared_ptr<T> m_data;
 };
 
