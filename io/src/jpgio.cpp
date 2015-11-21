@@ -86,14 +86,16 @@ Image<unsigned char> readJpgFile(const std::string &filename) {
   //allocate the image data buffer
   unsigned char *image_data = (unsigned char *) malloc(row_bytes * height);
 
+  size_t image_size = width * height;
+
   int y = 0;
   while (cinfo.output_scanline < height) {
     (void) jpeg_read_scanlines(&cinfo, buffer, 1);
 
     for (int x = 0; x < width; ++x) {
-      image_data[y * row_bytes + 3 * x] = buffer[0][3 * x];
-      image_data[y * row_bytes + 3 * x + 1] = buffer[0][3 * x + 1];
-      image_data[y * row_bytes + 3 * x + 2] = buffer[0][3 * x + 2];
+      image_data[y * width + x] = buffer[0][3 * x];
+      image_data[image_size + y * width + x] = buffer[0][3 * x + 1];
+      image_data[2 * image_size + y * width + x] = buffer[0][3 * x + 2];
     }
     ++y;
   }
