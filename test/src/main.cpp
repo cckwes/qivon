@@ -2,6 +2,7 @@
 #include <pngio.h>
 #include <jpgio.h>
 #include <iostream>
+#include <x86intrin.h>
 
 int main(int argc, char *argv[]) {
   //test open image
