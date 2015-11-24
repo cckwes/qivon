@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <image.h>
 
 namespace qivon {
