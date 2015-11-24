@@ -19,8 +19,10 @@ template<class T>
 class QIVON_EXPORT Image {
  public:
   Image();
-  Image(int width, int height, int channels);
-  Image(int width, int height, int channels, T *data);
+  Image(size_t width, size_t  height, size_t channels);
+  Image(size_t width, size_t height, size_t channels, T *data);
+  Image(size_t width, size_t height, size_t channels, ColorType type);
+  Image(size_t width, size_t height, size_t channels, ColorType type, T *data);
 
   //copy constructor
   Image(const Image &img);
@@ -30,9 +32,9 @@ class QIVON_EXPORT Image {
 
   bool isEmpty();
 
-  inline int width() const { return m_width; }
-  inline int height() const { return m_height; }
-  inline int channels() const { return m_channels; }
+  inline size_t width() const { return m_width; }
+  inline size_t height() const { return m_height; }
+  inline size_t channels() const { return m_channels; }
   inline ColorType color() const {return m_colorType; }
   inline T *data() const { return m_data.get(); }
   inline std::shared_ptr<T> data_ptr() const { return m_data; }
@@ -40,8 +42,8 @@ class QIVON_EXPORT Image {
   void setColorType(ColorType _type);
 
  private:
-  int m_width, m_height;
-  int m_channels;
+  size_t m_width, m_height;
+  size_t m_channels;
   ColorType m_colorType;
   std::shared_ptr<T> m_data;
 };

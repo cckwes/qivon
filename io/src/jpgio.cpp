@@ -78,8 +78,8 @@ Image<unsigned char> readJpgFile(const std::string &filename) {
   }
 
   row_bytes = cinfo.output_width * cinfo.output_components;
-  int width = cinfo.output_width;
-  int height = cinfo.output_height;
+  size_t width = cinfo.output_width;
+  size_t height = cinfo.output_height;
 
   buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr) &cinfo, JPOOL_IMAGE, row_bytes, 1);
 
@@ -106,7 +106,7 @@ Image<unsigned char> readJpgFile(const std::string &filename) {
 
   fclose(fp);
 
-  return Image<unsigned char>(width, height, 3, image_data);
+  return Image<unsigned char>(width, height, 3, Type_RGB, image_data);
 }
 
 bool writeJpgFile(const std::string &filename, Image<unsigned char> &image) {

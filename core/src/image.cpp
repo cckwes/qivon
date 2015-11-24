@@ -7,19 +7,18 @@ Image<T>::Image()
 }
 
 template<class T>
-Image<T>::Image(int width, int height, int channels)
-    : m_width(0), m_height(0), m_channels(0), m_colorType(Type_Invalid) {
-  m_width = width > 0 ? width : 0;
-  m_height = height > 0 ? height : 0;
-  m_channels = channels > 0 ? channels : 0;
+Image<T>::Image(size_t width, size_t height, size_t channels)
+    : m_width(width), m_height(height), m_channels(channels), m_colorType(Type_Invalid) {
+  if (width == 0 || height == 0 || channels == 0)
+    return;
+
+  T *data = (T*) malloc(m_width * m_height * m_channels * sizeof(T));
+  m_data.reset(data);
 }
 
 template<class T>
-Image<T>::Image(int width, int height, int channels, T *data)
-    : m_width(0), m_height(0), m_channels(0), m_colorType(Type_Invalid) {
-  m_width = width > 0 ? width : 0;
-  m_height = height > 0 ? height : 0;
-  m_channels = channels > 0 ? channels : 0;
+Image<T>::Image(size_t width, size_t height, size_t channels, T *data)
+    : m_width(width), m_height(height), m_channels(channels), m_colorType(Type_Invalid) {
   m_data.reset(data);
 }
 
@@ -34,6 +33,22 @@ Image<T>::Image(const Image<T> &img) {
   m_data = img.data_ptr();
 }
 
+template <class T>
+Image<T>::Image(size_t width, size_t height, size_t channels, ColorType type)
+    : m_width(width), m_height(height), m_channels(channels), m_colorType(type) {
+  if (width == 0 || height == 0 || channels == 0)
+    return;
+
+  T *data = (T*) malloc(m_width * m_height * m_channels * sizeof(T));
+  m_data.reset(data);
+}
+
+template <class T>
+Image<T>::Image(size_t width, size_t height, size_t channels, ColorType type, T *data)
+    : m_width(width), m_height(height), m_channels(channels), m_colorType(type) {
+  m_data.reset(data);
+}
+
 template<class T>
 Image<T>::~Image() {
 }
@@ -41,7 +56,6 @@ Image<T>::~Image() {
 template<class T>
 bool Image<T>::isEmpty() {
   return (m_width == 0 && m_height == 0) || m_data.get() == nullptr;
-
 }
 
 template <class T>
@@ -60,5 +74,4 @@ class Image<unsigned short>;
 //32 bit float image
 template
 class Image<float>;
-
 }   //namespace qivon

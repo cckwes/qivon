@@ -7,7 +7,7 @@
 
 namespace qivon {
 
-QIVON_EXPORT void toGrayscale(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+QIVON_EXPORT Image<unsigned char> toGrayscale(const Image<unsigned char> &_src);
 
 }
 

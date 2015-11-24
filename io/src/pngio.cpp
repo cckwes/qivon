@@ -52,8 +52,8 @@ Image<unsigned char> readPngFile(const std::string &filename) {
   //read information from png file
   png_read_info(png_ptr, info_ptr);
 
-  int width = png_get_image_width(png_ptr, info_ptr);
-  int height = png_get_image_height(png_ptr, info_ptr);
+  size_t width = png_get_image_width(png_ptr, info_ptr);
+  size_t height = png_get_image_height(png_ptr, info_ptr);
   png_byte color_type = png_get_color_type(png_ptr, info_ptr);
   png_byte bit_depth = png_get_bit_depth(png_ptr, info_ptr);
 
@@ -74,8 +74,10 @@ Image<unsigned char> readPngFile(const std::string &filename) {
     return Image<unsigned char>();
   }
 
-  //can only read RGB and RGBA image at the moment
-  if (color_type != PNG_COLOR_TYPE_RGB && color_type != PNG_COLOR_TYPE_RGBA) {
+  //can only read Grayscale, RGB and RGBA image at the moment
+  if (color_type != PNG_COLOR_TYPE_RGB &&
+      color_type != PNG_COLOR_TYPE_RGBA &&
+      color_type != PNG_COLOR_TYPE_GRAY) {
     std::cerr << filename << " color type is not supported (" << color_type << ")" << std::endl;
     png_destroy_read_struct(&png_ptr, NULL, NULL);
     return Image<unsigned char>();
@@ -102,12 +104,13 @@ Image<unsigned char> readPngFile(const std::string &filename) {
     const png_byte *row = row_pointers[y];
 
     for (int x = 0; x < width; ++x) {
-      if (color_type == PNG_COLOR_TYPE_RGB) {
+      if (color_type == PNG_COLOR_TYPE_GRAY) {
+        image_data[y * width + x] = row[x];
+      } else if (color_type == PNG_COLOR_TYPE_RGB) {
         image_data[y * width + x] = row[3 * x];
         image_data[image_size + y * width + x] = row[3 * x + 1];
         image_data[2 * image_size + y * width + x] = row[3 * x + 2];
-      }
-      else if (color_type == PNG_COLOR_TYPE_RGBA) {
+      } else if (color_type == PNG_COLOR_TYPE_RGBA) {
         image_data[y * width + x] = row[4 * x];
         image_data[image_size + y * width + x] = row[4 * x + 1];
         image_data[2 * image_size + y * width + x] = row[4 * x + 2];
@@ -124,10 +127,12 @@ Image<unsigned char> readPngFile(const std::string &filename) {
 
   png_destroy_read_struct(&png_ptr, NULL, NULL);
 
+  if (color_type == PNG_COLOR_TYPE_GRAY)
+    return Image<unsigned char>(width, height, 1, Type_Grayscale, image_data);
   if (color_type == PNG_COLOR_TYPE_RGB)
-    return Image<unsigned char>(width, height, 3, image_data);
+    return Image<unsigned char>(width, height, 3, Type_RGB, image_data);
   else if (color_type == PNG_COLOR_TYPE_RGBA)
-    return Image<unsigned char>(width, height, 4, image_data);
+    return Image<unsigned char>(width, height, 4, Type_RGBA, image_data);
   else
     return Image<unsigned char>();
 }
@@ -138,8 +143,10 @@ bool writePngFile(const std::string &filename, Image<unsigned char> &image) {
     return false;
   }
 
-  if (image.channels() != 3 && image.channels() != 4) {
-    std::cerr << "Can only output image with 3 or 4 channels\n";
+  if (image.channels() != 3
+      && image.channels() != 4
+      && image.channels() != 1) {
+    std::cerr << "Can only output image with 1, 3 or 4 channels\n";
     return false;
   }
 
@@ -177,7 +184,14 @@ bool writePngFile(const std::string &filename, Image<unsigned char> &image) {
     return false;
   }
 
-  if (image.channels() == 3) {
+  if (image.channels() == 1) {
+    png_set_IHDR(png_ptr, info_ptr,
+                 image.width(), image.height(),
+                 8, PNG_COLOR_TYPE_GRAY,
+                 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
+                 PNG_FILTER_TYPE_BASE);
+  }
+  else if (image.channels() == 3) {
     png_set_IHDR(png_ptr, info_ptr,
                  image.width(), image.height(),
                  8, PNG_COLOR_TYPE_RGB,
@@ -202,8 +216,8 @@ bool writePngFile(const std::string &filename, Image<unsigned char> &image) {
 
   unsigned char *image_data = image.data();
 
-  int width = image.width();
-  int height = image.height();
+  size_t width = image.width();
+  size_t height = image.height();
 
   png_bytep *row_pointers = (png_bytep *) malloc(sizeof(png_bytep) * height);
 
@@ -216,12 +230,13 @@ bool writePngFile(const std::string &filename, Image<unsigned char> &image) {
     png_byte *row = row_pointers[y];
 
     for (int x = 0; x < width; ++x) {
-      if (image.channels() == 3) {
+      if (image.channels() == 1) {
+        row[x] = image_data[y * width + x];
+      } else if (image.channels() == 3) {
         row[3 * x] = image_data[y * width + x];
         row[3 * x + 1] = image_data[image_size + y * width + x];
         row[3 * x + 2] = image_data[2 * image_size + y * width + x];
-      }
-      else if (image.channels() == 4) {
+      } else if (image.channels() == 4) {
         row[4 * x] = image_data[y * width + x];
         row[4 * x + 1] = image_data[image_size + y * width + x];
         row[4 * x + 2] = image_data[2 * image_size + y * width + x];
