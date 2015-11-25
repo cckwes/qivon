@@ -32,7 +32,8 @@ int main(int argc, char *argv[]) {
   // test convert
   // to grayscale
   ///////////////////////
-  qivon::Image<unsigned char> grayscale_img = qivon::toGrayscale(img);
+  qivon::Image<unsigned char> grayscale_img;
+  qivon::toGrayscale(img, grayscale_img);
 
   rst = qivon::writePngFile("grayscale.png", grayscale_img);
 
@@ -53,6 +54,22 @@ int main(int argc, char *argv[]) {
   std::cout << "Image is empty: " << img.isEmpty() << "\n";
 
   rst = qivon::writePngFile("from_jpg.png", img);
+
+  if (rst)
+    std::cout << "Image exported successfully\n";
+  else
+    std::cout << "Problem encountered when export image\n";
+  ///////////////////////
+
+
+  ///////////////////////
+  // test convert RGB
+  // to BGR
+  ///////////////////////
+  qivon::Image<unsigned char> bgr_img;
+  qivon::rgb_to_bgr(img, bgr_img);
+
+  rst = qivon::writePngFile("bgr.png", bgr_img);
 
   if (rst)
     std::cout << "Image exported successfully\n";

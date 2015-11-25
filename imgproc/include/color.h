@@ -7,7 +7,11 @@
 
 namespace qivon {
 
-QIVON_EXPORT Image<unsigned char> toGrayscale(const Image<unsigned char> &_src);
+QIVON_EXPORT void toGrayscale(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+
+QIVON_EXPORT void rgb_to_bgr(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+
+QIVON_EXPORT void bgr_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst);
 
 }
 

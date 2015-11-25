@@ -95,19 +95,23 @@ void bgr_to_grayscale_8u(unsigned char* _src, unsigned char* _dst, size_t _width
   }
 }
 
-Image<unsigned char> toGrayscale(const Image<unsigned char> &_src)
-{
+void toGrayscale(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
   //can only handle RGB type
   if (_src.color() != Type_RGB
       && _src.color() != Type_BGR
       && _src.color() != Type_RGBA) {
-    std::cerr << "Can not convert image type other than RGBA, RGB and BGR\n";
-    return Image<unsigned char>();
+    std::cerr << "Can not convert image type other than RGBA, RGB and BGRin "
+        << __FUNCTION__ << " at " << __LINE__ << "\n";
+    return;
   }
 
-  if (_src.data() == nullptr) {
-    std::cerr << "NULL data for source image\n";
-    return Image<unsigned char>();
+  if (_src.data() == nullptr
+      || _src.width() == 0
+      || _src.height() == 0
+      || _src.channels() == 0) {
+    std::cerr << "source image nullptr or wrong size in "
+        << __FUNCTION__ << " at " << __LINE__ << "\n";
+    return;
   }
 
   unsigned char *gray = (unsigned char*) malloc(_src.width() * _src.height() * sizeof(unsigned char));
@@ -117,7 +121,69 @@ Image<unsigned char> toGrayscale(const Image<unsigned char> &_src)
   else
     bgr_to_grayscale_8u(_src.data(), gray, _src.width(), _src.height());
 
-  return Image<unsigned char>(_src.width(), _src.height(), 1, Type_Grayscale, gray);
+  _dst = Image<unsigned char>(_src.width(), _src.height(), 1, Type_Grayscale, gray);
+}
+
+void rgb_to_bgr(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+  //input can be only type rgb
+  if (_src.color() != Type_RGB) {
+    std::cerr << "Can not convert image type other than RGB in "
+        << __FUNCTION__ << " at line " << __LINE__ << "\n";
+    return;
+  }
+
+  if (_src.data() == nullptr
+      || _src.width() == 0
+      || _src.height() == 0
+      || _src.channels() == 0) {
+    std::cerr << "source image nullptr or wrong size in "
+        << __FUNCTION__ << " at line " << __LINE__ << "\n";
+    return;
+  }
+
+  size_t image_size = _src.width() * _src.height();
+
+  unsigned char *bgr = (unsigned char*) malloc(3 * _src.width() * _src.height() * sizeof(unsigned char));
+  unsigned char *original = _src.data();
+
+  for (size_t i = 0; i < image_size; ++i) {
+    bgr[i] = original[2 * image_size + i];
+    bgr[image_size + i] = original[image_size + i];
+    bgr[2 * image_size + i] = original[i];
+  }
+
+  _dst = Image<unsigned char>(_src.width(), _src.height(), 3, Type_BGR, bgr);
+}
+
+void bgr_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+  //input can be only type bgr
+  if (_src.color() != Type_BGR) {
+    std::cerr << "Can not convert image type other than BGR in "
+        << __FUNCTION__ << " at line " << __LINE__ << "\n";
+    return;
+  }
+
+  if (_src.data() == nullptr
+      || _src.width() == 0
+      || _src.height() == 0
+      || _src.channels() == 0) {
+    std::cerr << "source image nullptr or wrong size in "
+        << __FUNCTION__ << " at line " << __LINE__ << "\n";
+    return;
+  }
+
+  size_t image_size = _src.width() * _src.height();
+
+  unsigned char *rgb = (unsigned char*) malloc(3 * _src.width() * _src.height() * sizeof(unsigned char));
+  unsigned char *original = _src.data();
+
+  for (size_t i = 0; i < image_size; ++i) {
+    rgb[i] = original[2 * image_size + i];
+    rgb[image_size + i] = original[image_size + i];
+    rgb[2 * image_size + i] = original[i];
+  }
+
+  _dst = Image<unsigned char>(_src.width(), _src.height(), 3, Type_RGB, rgb);
 }
 
 }
