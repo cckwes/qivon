@@ -109,16 +109,32 @@ Image<unsigned char> readJpgFile(const std::string &filename) {
   return Image<unsigned char>(width, height, 3, Type_RGB, image_data);
 }
 
-bool writeJpgFile(const std::string &filename, Image<unsigned char> &image) {
+bool writeJpgFile(const std::string &filename,
+                  Image<unsigned char> &image,
+                  unsigned int quality) {
   if (image.isEmpty()) {
     std::cerr << "Empty image, not exporting\n";
     return false;
   }
 
-  if (image.channels() != 3) {
+  if (image.channels() != 3 && image.channels() != 1) {
     std::cerr << "Can only output image with 3 channels\n";
     return false;
   }
+
+  if (quality == 0 || quality > 100) {
+    std::cerr << "Invalid quality\n";
+    return false;
+  }
+
+  struct jpeg_compress_struct cinfo;
+
+  struct jpeg_error_mgr jerr;
+  JSAMPROW  row_pointer[1];
+  int row_stride;
+
+  cinfo.err = jpeg_std_error(&jerr);
+  jpeg_create_compress(&cinfo);
 
   FILE *fp = fopen(filename.c_str(), "wb");
 
@@ -126,6 +142,63 @@ bool writeJpgFile(const std::string &filename, Image<unsigned char> &image) {
     std::cerr << "Error open " << filename << " for jpg exporting\n";
     return false;
   }
+
+  jpeg_stdio_dest(&cinfo, fp);
+
+  //entering image info into cinfo structure
+  cinfo.image_width = image.width();
+  cinfo.image_height = image.height();
+  if (image.channels() == 3) {
+    cinfo.input_components = 3;
+    cinfo.in_color_space = JCS_RGB;
+
+    row_stride = image.width() * 3;
+
+  } else if (image.channels() == 1) {
+    cinfo.input_components = 1;
+    cinfo.in_color_space = JCS_GRAYSCALE;
+
+    row_stride = image.width();
+  }
+
+  jpeg_set_defaults(&cinfo);
+  jpeg_set_quality(&cinfo, quality, TRUE);
+  jpeg_start_compress(&cinfo, TRUE);
+
+  unsigned char *buffer = (unsigned char *) malloc(row_stride * sizeof(unsigned char));
+  unsigned char *image_buffer = image.data();
+  size_t width = image.width();
+  size_t height = image.height();
+  size_t image_size = width * height;
+
+  size_t current_height = 0;
+  while (cinfo.next_scanline < cinfo.image_height) {
+    for (int i = 0; i < image.width(); ++i) {
+      if (image.channels() == 3) {
+        //green buffer at same location for BGR and RGB
+        buffer[i * 3 + 1] = image_buffer[current_height * width + i + image_size];
+
+        if (image.color() == Type_RGB) {
+          buffer[i * 3] = image_buffer[current_height * width + i];
+          buffer[i * 3 + 2] = image_buffer[current_height * width + i + 2 * image_size];
+        } else if (image.color() == Type_BGR) {
+          buffer[i * 3] = image_buffer[current_height * width + i + 2 * image_size];
+          buffer[i * 3 + 2] = image_buffer[current_height * width + i];
+        }
+      } else {
+        //single channel grayscale image
+        buffer[i] = image_buffer[current_height * width + i];
+      }
+    }
+    row_pointer[0] = buffer;
+    (void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
+    ++current_height;
+  }
+
+  jpeg_finish_compress(&cinfo);
+  fclose(fp);
+
+  jpeg_destroy_compress(&cinfo);
 
   return true;
 }
