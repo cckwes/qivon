@@ -6,7 +6,8 @@
 
 namespace qivon {
 
-QIVON_EXPORT void meanFilter(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+QIVON_EXPORT void meanFilter3x3(Image<unsigned char> &_src,
+                             Image<unsigned char> &_dst);
 
 }   //namespace qivon
 

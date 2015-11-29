@@ -2,7 +2,7 @@
 #define QIVON_IMAGE_H
 
 #include <memory>
-
+#include <vector>
 #include "qivon_config.h"
 
 namespace qivon {
@@ -38,6 +38,8 @@ class QIVON_EXPORT Image {
   inline ColorType color() const {return m_colorType; }
   inline T *data() const { return m_data.get(); }
   inline std::shared_ptr<T> data_ptr() const { return m_data; }
+
+  std::vector<T> get(size_t u, size_t v);
 
   void setColorType(ColorType _type);
 

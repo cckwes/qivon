@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <image.h>
+#include <iostream>
 
 namespace qivon {
 template<class T>
@@ -62,6 +63,38 @@ bool Image<T>::isEmpty() {
 template <class T>
 void Image<T>::setColorType(ColorType _type) {
   m_colorType = _type;
+}
+
+template <class T>
+std::vector<T> Image<T>::get(size_t u, size_t v) {
+  std::vector<T> result;
+
+  if (isEmpty())
+    return result;
+
+  if (u >= m_width || v >= m_height) {
+    std::cerr << "u or v out of range with " << u << "," << v << "\n";
+    return result;
+  }
+
+  size_t image_size = m_width * m_height;
+
+  T* ptr = m_data.get();
+
+  //push back the grayscale value
+  //or 1st channel for 3/4 channels image
+  result.push_back(ptr[v * m_width + u]);
+
+  if (m_channels == 3) {
+    result.push_back(ptr[v * m_height + u + image_size]);
+    result.push_back(ptr[v * m_height + u + 2 * image_size]);
+  } else if (m_channels == 4) {
+    result.push_back(ptr[v * m_height + u + image_size]);
+    result.push_back(ptr[v * m_height + u + 2 * image_size]);
+    result.push_back(ptr[v * m_height + u + 3 * image_size]);
+  }
+
+  return result;
 }
 
 //8 bit image
