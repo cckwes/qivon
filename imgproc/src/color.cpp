@@ -1,12 +1,12 @@
 #if defined(__GNUC__)
 #include <x86intrin.h>
-#include <iostream>
 #elif defined(_MSC_VER)
 #include <intrin.h>
 #else
 #error Unknown compiler, not including any intrinsic header
 #endif
 
+#include <iostream>
 #include "color.h"
 
 namespace qivon {

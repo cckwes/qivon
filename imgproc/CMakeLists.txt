@@ -10,8 +10,12 @@ endif()
 include_directories(${qivon_imgproc_SOURCE_DIR}/include)
 include_directories(${qivon_SOURCE_DIR}/core/include)
 
-set(SOURCES src/color.cpp)
-set(HEADERS include/color.h)
+set(SOURCES
+        src/color.cpp
+        src/filter.cpp)
+set(HEADERS
+        include/color.h
+        include/filter.h)
 
 add_library(qivon_imgproc SHARED ${SOURCES} ${HEADERS})
 target_link_libraries(qivon_imgproc qivon_core)
