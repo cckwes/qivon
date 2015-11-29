@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <vector>
+#include <chrono>
 #include "filter.h"
 
 namespace qivon {
@@ -55,6 +56,38 @@ void meanFilter3x3_ch1(Image<unsigned char> &_src,
   _dst = Image<unsigned char>(width, height, 1, Type_Grayscale, result);
 }
 
+void meanFilter3x3_ch1_separable(Image<unsigned char> &_src,
+                                 Image<unsigned char> &_dst) {
+  size_t width = _src.width();
+  size_t height = _src.height();
+  size_t image_size = width * height;
+
+  unsigned char *temporary = (unsigned char *) malloc(image_size * sizeof(unsigned char));
+  unsigned char *result = (unsigned char *) malloc(image_size * sizeof(unsigned char));
+
+  for (int i = 0; i < height; ++i) {
+    for (int j = 0; j < width; ++j) {
+      int previous_u = j - 1 >= 0 ? j - 1 : 1;
+      int next_u = j + 1 < width ? j + 1 : width - 2;
+
+      temporary[i * width + j] = (unsigned char) ((_src.data()[i * width + previous_u]
+          + _src.data()[i * width + j] + _src.data()[i * width + next_u]) / 3);
+    }
+  }
+
+  for (int i = 0; i < height; ++i) {
+    for (int j = 0; j < width; ++j) {
+      int previous_v = i - 1 >= 0 ? i - 1 : 1;
+      int next_v = i + 1 < height ? i + 1: height - 2;
+
+      result[i * width + j] = (unsigned char) ((temporary[previous_v * width + j]
+          + temporary[i * width + j] + temporary[next_v * width + j]) / 3);
+    }
+  }
+
+  _dst = Image<unsigned char>(width, height, 1, Type_Grayscale, result);
+}
+
 void meanFilter3x3(Image<unsigned char> &_src,
                 Image<unsigned char> &_dst) {
   if (_src.isEmpty()
@@ -66,7 +99,7 @@ void meanFilter3x3(Image<unsigned char> &_src,
   }
 
   if (_src.channels() == 1) {
-    meanFilter3x3_ch1(_src, _dst);
+    meanFilter3x3_ch1_separable(_src, _dst);
   }
 }
 
