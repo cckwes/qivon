@@ -7,6 +7,7 @@
 #endif
 
 #include <iostream>
+#include <cmath>
 #include "color.h"
 
 namespace qivon {
@@ -184,6 +185,26 @@ void bgr_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
   }
 
   _dst = Image<unsigned char>(_src.width(), _src.height(), 3, Type_RGB, rgb);
+}
+
+void gamma_correction(Image<unsigned char> &_src, Image<unsigned char> &_dst, float _gamma) {
+  if (_src.isEmpty()) {
+    std::cerr << "source image empty\n";
+    return;
+  }
+
+  float gamma_correction = 1.0f / _gamma;
+
+  unsigned char *result = (unsigned char *) malloc(_src.channels() * _src.width()
+                                                       * _src.height() * sizeof(unsigned char));
+
+  size_t image_size = _src.width() * _src.height();
+
+  for (size_t i = 0; i < image_size; ++i) {
+    result[i] = (unsigned char) (255.0f * std::pow(_src.data()[i] / 255.0f, gamma_correction));
+  }
+
+  _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);
 }
 
 }
