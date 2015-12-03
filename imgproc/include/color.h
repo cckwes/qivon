@@ -15,6 +15,7 @@ QIVON_EXPORT void bgr_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_
 
 QIVON_EXPORT void gamma_correction(Image<unsigned char> &_src, Image<unsigned char> &_dst, float _gamma);
 
+QIVON_EXPORT void gamma_correction_LUT(Image<unsigned char> &_src, Image<unsigned char> &_dst, float _gamma);
 }
 
 #endif  //QIVON_COLOR_H

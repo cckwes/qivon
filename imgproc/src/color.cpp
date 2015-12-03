@@ -187,6 +187,12 @@ void bgr_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
   _dst = Image<unsigned char>(_src.width(), _src.height(), 3, Type_RGB, rgb);
 }
 
+void build_gamma_correction_LUT(unsigned char *table, float _gamma_correction) {
+  for (size_t i = 0; i < 256; ++i) {
+    table[i] = (unsigned char) (255.0f * std::pow((float)i / 255.0f, _gamma_correction));
+  }
+}
+
 void gamma_correction(Image<unsigned char> &_src, Image<unsigned char> &_dst, float _gamma) {
   if (_src.isEmpty()) {
     std::cerr << "source image empty\n";
@@ -198,10 +204,33 @@ void gamma_correction(Image<unsigned char> &_src, Image<unsigned char> &_dst, fl
   unsigned char *result = (unsigned char *) malloc(_src.channels() * _src.width()
                                                        * _src.height() * sizeof(unsigned char));
 
-  size_t image_size = _src.width() * _src.height();
+  size_t image_size = _src.width() * _src.height() * _src.channels();
 
   for (size_t i = 0; i < image_size; ++i) {
     result[i] = (unsigned char) (255.0f * std::pow(_src.data()[i] / 255.0f, gamma_correction));
+  }
+
+  _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);
+}
+
+QIVON_EXPORT void gamma_correction_LUT(Image<unsigned char> &_src, Image<unsigned char> &_dst, float _gamma) {
+  if (_src.isEmpty()) {
+    std::cerr << "source image empty\n";
+    return;
+  }
+
+  float gamma_correction = 1.0f / _gamma;
+
+  size_t image_size = _src.width() * _src.height() * _src.channels();
+
+  unsigned char table[256];
+
+  build_gamma_correction_LUT(table, gamma_correction);
+
+  unsigned char *result = (unsigned char *) malloc(image_size);
+
+  for (size_t i = 0; i < image_size; ++i) {
+    result[i] = table[_src.data()[i]];
   }
 
   _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);

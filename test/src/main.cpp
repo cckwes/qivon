@@ -82,6 +82,22 @@ int main(int argc, char *argv[]) {
 
 
   ///////////////////////
+  // test gamma correction
+  ///////////////////////
+  qivon::Image<unsigned char> gamma;
+
+  qivon::gamma_correction(img, gamma, 1.5);
+
+  rst = qivon::writePngFile("gamma.png", gamma);
+
+  if (rst)
+    std::cout << "Image exported successfully\n";
+  else
+    std::cout << "Problem encountered when export image\n";
+  ///////////////////////
+
+
+  ///////////////////////
   // test convert RGB
   // to BGR
   ///////////////////////
