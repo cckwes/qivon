@@ -1,9 +1,11 @@
+#include <iostream>
+#include <chrono>
+
 #include <image.h>
 #include <pngio.h>
 #include <jpgio.h>
 #include <color.h>
 #include <filter.h>
-#include <iostream>
 
 int main(int argc, char *argv[]) {
 
@@ -84,9 +86,31 @@ int main(int argc, char *argv[]) {
   ///////////////////////
   // test gamma correction
   ///////////////////////
+  const size_t run_time = 100;
+
   qivon::Image<unsigned char> gamma;
 
-  qivon::gamma_correction(img, gamma, 1.5);
+  auto start = std::chrono::system_clock::now();
+
+  for (size_t i = 0; i < run_time; ++i) {
+    qivon::gamma_correction(img, gamma, 1.5);
+  }
+
+  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
+      (std::chrono::system_clock::now() - start);
+
+  std::cout << "Naive gamma corection uses (avg) " << elapsed.count() / run_time << "\n";
+
+  start = std::chrono::system_clock::now();
+
+  for (size_t i = 0; i < run_time; ++i) {
+    qivon::gamma_correction_LUT(img, gamma, 1.5);
+  }
+
+  elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
+      (std::chrono::system_clock::now() - start);
+
+  std::cout << "LUT gamma corection uses (avg) " << elapsed.count() / run_time << "\n";
 
   rst = qivon::writePngFile("gamma.png", gamma);
 

@@ -213,7 +213,7 @@ void gamma_correction(Image<unsigned char> &_src, Image<unsigned char> &_dst, fl
   _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);
 }
 
-QIVON_EXPORT void gamma_correction_LUT(Image<unsigned char> &_src, Image<unsigned char> &_dst, float _gamma) {
+void gamma_correction_LUT(Image<unsigned char> &_src, Image<unsigned char> &_dst, float _gamma) {
   if (_src.isEmpty()) {
     std::cerr << "source image empty\n";
     return;
