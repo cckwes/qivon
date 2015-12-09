@@ -236,4 +236,82 @@ void gamma_correction_LUT(Image<unsigned char> &_src, Image<unsigned char> &_dst
   _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);
 }
 
+void increase_brightness(Image<unsigned char> &_src,
+                         Image<unsigned char> &_dst,
+                         unsigned char _value) {
+  const size_t image_size = _src.width() * _src.height() * _src.channels();
+
+  unsigned char *result = (unsigned char *) malloc(image_size);
+
+  __m128i value = _mm_set1_epi8(_value);
+
+  size_t i;
+  for (i = 0; i < (image_size - 16); i += 16) {
+    __m128i src_vec = _mm_loadu_si128((__m128i*) &_src.data()[i]);
+    __m128i result_vec = _mm_adds_epu8(src_vec, value);
+
+    unsigned char *res = (unsigned char *) &result_vec;
+
+    for (size_t j = 0; j < 16; ++j) {
+      result[i + j] = res[j];
+    }
+  }
+
+  for (; i < image_size; ++i) {
+    result[i] = _src.data()[i] + _value;
+  }
+
+  _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);
+}
+
+void decrease_brightness(Image<unsigned char> &_src,
+                         Image<unsigned char> &_dst,
+                         unsigned char _value) {
+  const size_t image_size = _src.width() * _src.height() * _src.channels();
+
+  unsigned char *result = (unsigned char *) malloc(image_size);
+
+  __m128i value = _mm_set1_epi8(_value);
+
+  size_t i;
+  for (i = 0; i < (image_size - 16); i += 16) {
+    __m128i src_vec = _mm_loadu_si128((__m128i*) &_src.data()[i]);
+    __m128i result_vec = _mm_subs_epu8(src_vec, value);
+
+    unsigned char *res = (unsigned char *) &result_vec;
+
+    for (size_t j = 0; j < 16; ++j) {
+      result[i + j] = res[j];
+    }
+  }
+
+  for (; i < image_size; ++i) {
+    result[i] = _src.data()[i] - _value;
+  }
+
+  _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);
+}
+
+void brightness_adjustment(Image<unsigned char> &_src,
+                           Image<unsigned char> &_dst,
+                           int _adjustment) {
+  if (_src.isEmpty()) {
+    std::cerr << "source image empty\n";
+    _dst = Image<unsigned char>();
+    return;
+  }
+
+  if (_adjustment > 255 || _adjustment < -255) {
+    std::cerr << "invalid brightness adjustment value\n";
+    _dst = Image<unsigned char>();
+    return;
+  }
+
+  if (_adjustment > 0) {
+    increase_brightness(_src, _dst, (unsigned char) _adjustment);
+  } else {
+    decrease_brightness(_src, _dst, (unsigned char) _adjustment);
+  }
+}
+
 }
