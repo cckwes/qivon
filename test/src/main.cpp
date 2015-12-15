@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
   ///////////////////////
   // test gamma correction
   ///////////////////////
-  const size_t run_time = 100;
+  const size_t run_time = 10;
 
   qivon::Image<unsigned char> gamma;
 
@@ -118,6 +118,18 @@ int main(int argc, char *argv[]) {
     std::cout << "Image exported successfully\n";
   else
     std::cout << "Problem encountered when export image\n";
+  ///////////////////////
+
+  ///////////////////////
+  // test brightness
+  // adjustment
+  ///////////////////////
+  img = qivon::readJpgFile("wallpaper.jpg");
+
+  qivon::Image<unsigned char> brightness;
+  qivon::brightness_adjustment(img, brightness, 50);
+
+  rst = qivon::writeJpgFile("brightness.jpg", brightness);
   ///////////////////////
 
 

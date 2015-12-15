@@ -292,7 +292,7 @@ void decrease_brightness(Image<unsigned char> &_src,
   _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);
 }
 
-void brightness_adjustment(Image<unsigned char> &_src,
+void  brightness_adjustment(Image<unsigned char> &_src,
                            Image<unsigned char> &_dst,
                            int _adjustment) {
   if (_src.isEmpty()) {
