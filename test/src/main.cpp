@@ -134,6 +134,17 @@ int main(int argc, char *argv[]) {
 
 
   ///////////////////////
+  // test contrast
+  // adjustment
+  ///////////////////////
+  qivon::Image<unsigned char> contrast;
+  qivon::contrast_adjustment(img, contrast, 110);
+
+  rst = qivon::writeJpgFile("contrast.jpg", contrast);
+  ///////////////////////
+
+  
+  ///////////////////////
   // test convert RGB
   // to BGR
   ///////////////////////

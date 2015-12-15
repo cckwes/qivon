@@ -314,4 +314,40 @@ void  brightness_adjustment(Image<unsigned char> &_src,
   }
 }
 
+void contrast_adjustment(Image<unsigned char> &_src,
+                         Image<unsigned char> &_dst,
+                         int _adjustment) {
+  if (_src.isEmpty()) {
+    std::cerr << "source image empty\n";
+    _dst = Image<unsigned char>();
+    return;
+  }
+
+  if (_adjustment > 255 || _adjustment < -255) {
+    std::cerr << "invalid contrast adjustment value\n";
+    _dst = Image<unsigned char>();
+    return;
+  }
+
+  unsigned char lut[256];
+
+  float factor = 259.0f * float(_adjustment + 255) / (255.0f * float(259 - _adjustment));
+
+  //build the LUT
+  for (size_t i = 0; i < 256; ++i) {
+    lut[i] = (unsigned char) std::max(std::min((int) (factor * (i - 128) + 128), 255), 0);
+  }
+
+  size_t image_size = _src.width() * _src.height() * _src.channels();
+
+  unsigned char *result = (unsigned char *) malloc(image_size);
+  unsigned char *source = _src.data();
+
+  for (size_t j = 0; j < image_size; ++j) {
+    result[j] = lut[source[j]];
+  }
+
+  _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);
+}
+
 }

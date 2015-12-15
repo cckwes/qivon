@@ -24,6 +24,10 @@ QIVON_EXPORT void gamma_correction_LUT(Image<unsigned char> &_src,
 QIVON_EXPORT void brightness_adjustment(Image<unsigned char> &_src,
                                         Image<unsigned char> &_dst,
                                         int _adjustment);
+
+QIVON_EXPORT void contrast_adjustment(Image<unsigned char> &_src,
+                                      Image<unsigned char> &_dst,
+                                      int _adjustment);
 }
 
 #endif  //QIVON_COLOR_H
