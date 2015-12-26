@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <image.h>
 #include <iostream>
+#include <string.h>
 
 namespace qivon {
 template<class T>

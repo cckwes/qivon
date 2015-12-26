@@ -12,10 +12,12 @@ include_directories(${qivon_SOURCE_DIR}/core/include)
 
 set(SOURCES
         src/color.cpp
-        src/filter.cpp)
+        src/filter.cpp
+        src/geometry.cpp)
 set(HEADERS
         include/color.h
-        include/filter.h)
+        include/filter.h
+        include/geometry.h)
 
 add_library(qivon_imgproc SHARED ${SOURCES} ${HEADERS})
 target_link_libraries(qivon_imgproc qivon_core)
