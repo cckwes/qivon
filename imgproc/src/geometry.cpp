@@ -37,7 +37,6 @@ void resizeImage(Image<T> &_src, Image<T> &_dst,
   size_t destination_image_size = _width * _height;
   size_t channels = _src.channels();
   T *original_data = _src.data();
-  T *result = (T*) malloc(_width * _height * channels * sizeof(T));
 
   //calculate the width and height ratio
   float ratio_width = float(_src.width()) / _width;
@@ -47,7 +46,16 @@ void resizeImage(Image<T> &_src, Image<T> &_dst,
   if (_keep_aspect_ratio) {
     float ratio = std::min(ratio_width, ratio_height);
     ratio_width = ratio_height = ratio;
+
+    //correct the width and heigh of destination image
+    _width = std::floor(float(_src.width()) / ratio_width);
+    _height = std::floor(float(_src.height()) / ratio_height);
+    destination_image_size = _width * _height;
   }
+
+  //malloc the result pointer after
+  //width and height of destination image is corrected
+  T *result = (T*) malloc(_width * _height * channels * sizeof(T));
 
   //loop through every destination pixel
   for (int i = 0; i < _height; ++i) {
@@ -60,11 +68,11 @@ void resizeImage(Image<T> &_src, Image<T> &_dst,
 
       size_t start_x, start_y, end_x, end_y;
 
-      start_x = (u_discrete < 2) ? 0 : u_discrete - 1;
-      start_y = (v_discrete < 2) ? 0 : v_discrete - 1;
+      start_x = (u_discrete < 2) ? 0 : (u_discrete > (_src.width() - 3)) ? _src.width() - 4 : u_discrete - 1;
+      start_y = (v_discrete < 2) ? 0 : (v_discrete > (_src.height() - 3)) ? _src.height() - 4 : v_discrete - 1;
 
-      end_x = (u_discrete > (_src.width() - 3)) ? _src.width() - 1 : u_discrete + 2;
-      end_y = (v_discrete > (_src.height() - 3)) ? _src.height() - 1 : v_discrete + 2;
+      end_x = (u_discrete > (_src.width() - 3)) ? _src.width() - 1 : (u_discrete < 2) ? 3 : u_discrete + 2;
+      end_y = (v_discrete > (_src.height() - 3)) ? _src.height() - 1 : (v_discrete < 2) ? 3 : v_discrete + 2;
 
       float pos_x, pos_y;
 
@@ -99,12 +107,16 @@ void resizeImage(Image<T> &_src, Image<T> &_dst,
 
         T pt_result = bicubicInterpolate(data, pos_x, pos_y);
 
-        result[i * _height + j + ch * destination_image_size] = pt_result;
+        result[i * _width + j + ch * destination_image_size] = pt_result;
       }
     }
   }
 
   _dst = qivon::Image<T>(_width, _height, channels, _src.color(), result);
 }
+
+template
+void resizeImage<unsigned char>(Image<unsigned char> &_src, Image<unsigned char> &_dst,
+                                            size_t _width, size_t _height, bool _keep_aspect_ratio);
 
 } //namespace qivon

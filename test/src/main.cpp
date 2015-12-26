@@ -6,6 +6,7 @@
 #include <jpgio.h>
 #include <color.h>
 #include <filter.h>
+#include <geometry.h>
 
 int main(int argc, char *argv[]) {
 
@@ -31,6 +32,10 @@ int main(int argc, char *argv[]) {
 
   qivon::Image<unsigned char> img_deep_copy = img.deepCopy();
   qivon::writePngFile("deep_copy.png", img_deep_copy);
+
+  qivon::Image<unsigned char> resized_img;
+  qivon::resizeImage(img, resized_img, 400, 300, true);
+  qivon::writePngFile("resized.png", resized_img);
   ///////////////////////
 
 

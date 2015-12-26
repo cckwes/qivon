@@ -10,7 +10,11 @@ namespace qivon {
 template <class T>
 QIVON_EXPORT void resizeImage(Image<T> &_src, Image<T> &_dst,
                               size_t _width, size_t _height,
-                              bool _keep_aspect_ratio);
+                              bool _keep_aspect_ratio = true);
+
+extern template
+void resizeImage<unsigned char>(Image<unsigned char> &_src, Image<unsigned char> &_dst,
+                                size_t _width, size_t _height, bool _keep_aspect_ratio);
 
 }   //namespace qivon
 
