@@ -28,6 +28,9 @@ int main(int argc, char *argv[]) {
     std::cout << "Image exported successfully\n";
   else
     std::cout << "Problem encountered when export image\n";
+
+  qivon::Image<unsigned char> img_deep_copy = img.deepCopy();
+  qivon::writePngFile("deep_copy.png", img_deep_copy);
   ///////////////////////
 
 

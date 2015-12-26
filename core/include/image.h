@@ -40,6 +40,7 @@ class QIVON_EXPORT Image {
   inline std::shared_ptr<T> data_ptr() const { return m_data; }
 
   std::vector<T> get(size_t u, size_t v);
+  Image<T> deepCopy();
 
   void setColorType(ColorType _type);
 

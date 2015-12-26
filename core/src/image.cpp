@@ -97,6 +97,17 @@ std::vector<T> Image<T>::get(size_t u, size_t v) {
   return result;
 }
 
+//deep copy
+template <class T>
+Image<T> Image<T>::deepCopy() {
+  size_t image_size = m_width * m_height * m_channels;
+  T *result = (T*) malloc(image_size * sizeof(T));
+
+  memcpy(result, m_data.get(), image_size * sizeof(T));
+
+  return qivon::Image<T>(m_width, m_height, m_channels, m_colorType, result);
+}
+
 //8 bit image
 template
 class Image<unsigned char>;
@@ -108,4 +119,5 @@ class Image<unsigned short>;
 //32 bit float image
 template
 class Image<float>;
+
 }   //namespace qivon
