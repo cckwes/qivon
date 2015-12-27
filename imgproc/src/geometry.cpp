@@ -119,4 +119,12 @@ template
 void resizeImage<unsigned char>(Image<unsigned char> &_src, Image<unsigned char> &_dst,
                                             size_t _width, size_t _height, bool _keep_aspect_ratio);
 
+template
+void resizeImage<unsigned short>(Image<unsigned short> &_src, Image<unsigned short> &_dst,
+                                 size_t width, size_t _height, bool _keep_aspect_ratio);
+
+template
+void resizeImage<float>(Image<float> &_src, Image<float> &_dst,
+                        size_t _width, size_t _height, bool _keep_aspect_ratio);
+
 } //namespace qivon
