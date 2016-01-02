@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include "util.h"
 #include "geometry.h"
 
 namespace qivon {
@@ -20,6 +21,9 @@ T bicubicInterpolate(T p[4][4], float x, float y) {
   return cubicInterpolate(arr, x);
 }
 
+//////////////////////////////
+// resize image
+//////////////////////////////
 template <class T>
 void resizeImage(Image<T> &_src, Image<T> &_dst,
                  size_t _width, size_t _height,
@@ -126,5 +130,71 @@ void resizeImage<unsigned short>(Image<unsigned short> &_src, Image<unsigned sho
 template
 void resizeImage<float>(Image<float> &_src, Image<float> &_dst,
                         size_t _width, size_t _height, bool _keep_aspect_ratio);
+//////////////////////////////
+
+
+//////////////////////////////
+// crop image
+//////////////////////////////
+template <class T>
+void cropImage(Image<T> &_src, Image<T> &_dst,
+               size_t _start_x, size_t _start_y,
+               size_t _end_x, size_t _end_y) {
+  //check image empty
+  if (_src.isEmpty()) {
+    std::cerr << "soure image empty in " << __FUNCTION__
+        << " at " << __LINE__ << std::endl;
+    return;
+  }
+
+  if (_start_x >= _end_x || _start_y >= _end_y) {
+    std::cerr << "logic error in " << __FUNCTION__ << std::endl;
+    return;
+  }
+
+  size_t width = _src.width();
+  size_t height = _src.height();
+  size_t img_size = width * height;
+  size_t origin = 0;
+
+  //check start and end x,y out of bound
+  if (!isWithin(_start_x, origin, width - 1) || !isWithin(_end_x, origin, width - 1)
+      || !isWithin(_start_y, origin, height - 1) || !isWithin(_end_y, origin, height - 1)) {
+    std::cerr << "crop size out of range in " << __FUNCTION__ << std::endl;
+    return;
+  }
+
+  size_t dst_width = _end_x - _start_x;
+  size_t dst_height = _end_y - _start_y;
+  size_t dst_img_size = dst_height * dst_width;
+  size_t channels = _src.channels();
+  T* result = (T *) malloc(dst_height * dst_width * channels * sizeof(T));
+
+  size_t y = 0;
+  for (size_t i = _start_y; i < _end_y; ++i) {
+    for (size_t ch = 0; ch < channels; ++ch) {
+      std::copy(_src.data() + i * width + _start_x + ch * img_size,
+                _src.data() + i * width + _end_x + ch * img_size,
+                result + y * dst_width + ch * dst_img_size);
+    }
+    ++y;
+  }
+
+  _dst = qivon::Image<T>(dst_width, dst_height, channels, _src.color(), result);
+}
+
+
+template void cropImage<unsigned char>(Image<unsigned char> &_src, Image<unsigned char> &_dst,
+                                       size_t _start_x, size_t _start_y,
+                                       size_t _end_x, size_t _end_y);
+
+template void cropImage<unsigned short>(Image<unsigned short> &_src, Image<unsigned short> &_dst,
+                                       size_t _start_x, size_t _start_y,
+                                       size_t _end_x, size_t _end_y);
+
+template void cropImage<float>(Image<float> &_src, Image<float> &_dst,
+                               size_t _start_x, size_t _start_y,
+                               size_t _end_x, size_t _end_y);
+//////////////////////////////
 
 } //namespace qivon

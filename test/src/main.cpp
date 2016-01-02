@@ -36,6 +36,10 @@ int main(int argc, char *argv[]) {
   qivon::Image<unsigned char> resized_img;
   qivon::resizeImage(img, resized_img, 400, 300, true);
   qivon::writePngFile("resized.png", resized_img);
+
+  qivon::Image<unsigned char> cropped_img;
+  qivon::cropImage(img, cropped_img, 192, 108, 1536, 864);
+  qivon::writePngFile("cropped.png", cropped_img);
   ///////////////////////
 
 

@@ -11,6 +11,6 @@ include_directories(${qivon_core_SOURCE_DIR}/include)
 
 set(SOURCES src/image.cpp)
 set(HEADERS
-        include/image.h)
+        include/image.h include/util.h)
 
 add_library(qivon_core SHARED ${SOURCES} ${HEADERS})
