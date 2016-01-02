@@ -28,6 +28,10 @@ QIVON_EXPORT void brightness_adjustment(Image<unsigned char> &_src,
 QIVON_EXPORT void contrast_adjustment(Image<unsigned char> &_src,
                                       Image<unsigned char> &_dst,
                                       int _adjustment);
+
+QIVON_EXPORT bool white_balance_adjustment(Image<unsigned char> &_src,
+                                           Image<unsigned char> &_dst,
+                                           int temperature);
 }
 
 #endif  //QIVON_COLOR_H

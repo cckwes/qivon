@@ -44,6 +44,22 @@ int main(int argc, char *argv[]) {
 
 
   ///////////////////////
+  // test white balance
+  // at diff temperature
+  ///////////////////////
+  int temperature[4] = {1850, 3200, 6500, 15000};
+  std::string output_filenames[4] = {"wb_1850.jpg", "wb_3200.jpg",
+                                     "wb_6500.jpg", "wb_15000.jpg"};
+
+  for (int i = 0; i < 4; ++i) {
+    qivon::Image<unsigned char> wb_tuned;
+    qivon::white_balance_adjustment(img, wb_tuned, temperature[i]);
+    qivon::writeJpgFile(output_filenames[i], wb_tuned);
+  }
+  ///////////////////////
+
+
+  ///////////////////////
   // test convert
   // to grayscale
   ///////////////////////

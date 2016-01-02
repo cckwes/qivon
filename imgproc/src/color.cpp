@@ -350,4 +350,108 @@ void contrast_adjustment(Image<unsigned char> &_src,
   _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);
 }
 
+bool white_balance_adjustment(Image<unsigned char> &_src,
+                              Image<unsigned char> &_dst,
+                              int temperature) {
+  //check temperature out of range
+  if (temperature < 1000 || temperature > 20000) {
+    std::cerr << "temperature out of range in " << __FUNCTION__ << std::endl;
+    return false;
+  }
+
+  //check image empty
+  if (_src.isEmpty()) {
+    std::cerr << "source image empty in " << __FUNCTION__ << std::endl;
+    return false;
+  }
+
+  //image must be RGB type
+  if (_src.color() != qivon::Type_RGB) {
+    std::cerr << "image must be RGB type in " << __FUNCTION__ << std::endl;
+    return false;
+  }
+
+  float temp = (float) temperature / 100.0f;
+
+  //calculate the 3 channel ratio
+  unsigned char red_val, green_val, blue_val;
+  red_val = green_val = blue_val = 0;
+
+  float a, b, c;
+
+  //red value calculation
+  if (temp <= 66)
+    red_val = 255;
+  else {
+    a = 351.9769;
+    b = 0.1142;
+    c = -40.2537;
+    float x = temp - 55;
+    float result = a + b * x + c * std::log(x);
+    red_val = std::max(0, std::min((int) result, 255));
+  }
+
+  //green value calculation
+  if (temp < 66) {
+    a = -155.2549;
+    b = -0.4460;
+    c = 104.4922;
+    float x = temp - 2;
+    float result = a + b * x + c * std::log(x);
+    green_val = std::max(0, std::min((int) result, 255));
+  } else {
+    a = 325.4494;
+    b = 0.0794;
+    c = -28.0853;
+    float x = temp - 50;
+    float result = a + b * x + c * std::log(x);
+    green_val = std::max(0, std::min((int) result, 255));
+  }
+
+  //blue value calculation
+  if (temp >= 66)
+    blue_val = 255;
+  else if (temp <= 20)
+    blue_val = 0;
+  else {
+    a = -254.7694;
+    b = 0.8274;
+    c = 115.6799;
+    float x = temp - 10;
+    float result = a + b * x + c * std::log(x);
+    blue_val = std::max(0, std::min((int) result, 255));
+  }
+
+  float red_ratio = (float) red_val / 255.0f;
+  float green_ratio = (float) green_val / 255.0f;
+  float blue_ratio = (float) blue_val / 255.0f;
+
+  //built the LUT
+  unsigned char r_lut[256], g_lut[256], b_lut[256];
+  for (int i = 0; i < 256; ++i) {
+    r_lut[i] = (unsigned char) ((float) i * red_ratio);
+    g_lut[i] = (unsigned char) ((float) i * green_ratio);
+    b_lut[i] = (unsigned char) ((float) i * blue_ratio);
+  }
+
+  size_t width = _src.width();
+  size_t height = _src.height();
+  size_t img_size = width * height;
+  unsigned char *source_data = _src.data();
+
+  unsigned char *result = (unsigned char*) malloc(img_size * _src.channels());
+
+  for (int i = 0; i < height; ++i) {
+    for (int j = 0; j < width; ++j) {
+      result[i * width + j] = r_lut[source_data[i * width + j]];
+      result[i * width + j + img_size] = g_lut[source_data[i * width + j + img_size]];
+      result[i * width + j + img_size + img_size] = b_lut[source_data[i * width + j + img_size + img_size]];
+    }
+  }
+
+  _dst = qivon::Image<unsigned char>(width, height, _src.channels(), _src.color(), result);
+
+  return true;
+}
+
 }
