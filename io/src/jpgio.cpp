@@ -112,16 +112,27 @@ Image<unsigned char> readJpgFile(const std::string &filename) {
 bool writeJpgFile(const std::string &filename,
                   Image<unsigned char> &image,
                   unsigned int quality) {
+  //check for empty image
   if (image.isEmpty()) {
     std::cerr << "Empty image, not exporting\n";
     return false;
   }
 
+  //check for number of channels (only 3 and 1 allowed)
   if (image.channels() != 3 && image.channels() != 1) {
     std::cerr << "Can only output image with 3 channels\n";
     return false;
   }
 
+  //checking for color type
+  //can only export RGB, BGR, Grayscale
+  if (image.color() != qivon::Type_RGB && image.color() != qivon::Type_BGR
+      && image.color() != qivon::Type_Grayscale) {
+    std::cerr << "Can only output image type BGR, RGB and Grayscale\n";
+    return false;
+  }
+
+  //quality range check
   if (quality == 0 || quality > 100) {
     std::cerr << "Invalid quality\n";
     return false;

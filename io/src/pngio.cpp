@@ -138,15 +138,25 @@ Image<unsigned char> readPngFile(const std::string &filename) {
 }
 
 bool writePngFile(const std::string &filename, Image<unsigned char> &image) {
+  //image empty check
   if (image.isEmpty()) {
     std::cerr << "Empty image, not exporting\n";
     return false;
   }
 
+  //image channels check (can only output 1, 3 or 4 channels image)
   if (image.channels() != 3
       && image.channels() != 4
       && image.channels() != 1) {
     std::cerr << "Can only output image with 1, 3 or 4 channels\n";
+    return false;
+  }
+
+  //color type checking
+  //can only output RGB, BGR, RGBA, Grayscale
+  if (image.color() != qivon::Type_Grayscale && image.color() != qivon::Type_BGR
+      && image.color() != qivon::Type_RGB && image.color() != qivon::Type_RGBA) {
+    std::cerr << "Unable to output image with this color type\n";
     return false;
   }
 
