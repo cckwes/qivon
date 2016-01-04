@@ -13,6 +13,10 @@ QIVON_EXPORT void rgb_to_bgr(Image<unsigned char> &_src, Image<unsigned char> &_
 
 QIVON_EXPORT void bgr_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst);
 
+QIVON_EXPORT void rgb_to_hsv(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+
+QIVON_EXPORT void hsv_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+
 QIVON_EXPORT void gamma_correction(Image<unsigned char> &_src,
                                    Image<unsigned char> &_dst,
                                    float _gamma);

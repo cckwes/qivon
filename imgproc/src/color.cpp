@@ -187,6 +187,73 @@ void bgr_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
   _dst = Image<unsigned char>(_src.width(), _src.height(), 3, Type_RGB, rgb);
 }
 
+void rgb_to_hsv(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+  //check image empty
+  if (_src.isEmpty()) {
+    std::cerr << "empty image in " << __FUNCTION__ << std::endl;
+    return;
+  }
+
+  //check input image color type
+  if (_src.color() != Type_RGB || _src.channels() != 3) {
+    std::cerr << "input color type not rgb in " << __FUNCTION__ << std::endl;
+    return;
+  }
+
+  size_t width = _src.width();
+  size_t height = _src.height();
+  size_t img_size = width * height;
+  unsigned char *source_data = _src.data();
+
+  unsigned char *result = (unsigned char *) malloc(img_size * 3 * sizeof(unsigned char));
+
+  for (size_t i = 0; i < height; ++i) {
+    for (size_t j = 0; j < width; ++j) {
+      int r, g, b;
+      r = (float) source_data[i * width + j] / 255.0f;
+      g = (float) source_data[i * width + j + img_size] / 255.0f;
+      b = (float) source_data[i * width + j + img_size + img_size] / 255.0f;
+
+      float min, max, delta;
+      min = (float) std::min(r, std::min(g, b));
+      max = (float) std::max(r, std::max(g, b));
+      delta = max - min;
+
+      //get the V value
+      unsigned char v = (unsigned char) (max * 255.0f);
+
+      //get the H value
+      float f_h;
+      if (delta == 0)
+        f_h = 0;
+      else if (max == r)
+        f_h = 60.0f * (g - b) / delta;
+      else if (max == g)
+        f_h = 120.0f + 60.0f * (b - r) / delta;
+      else                              //max == b
+        f_h = 240.0f + 60.0f * (r - g) / delta;
+      if (f_h < 0)
+        f_h += 360.0f;
+
+      unsigned char h = (unsigned char) f_h / 360.0f * 255.0f;
+
+      //get the S value
+      unsigned char s;
+      if (max == 0)
+        s = 0;
+      else
+        s = (unsigned char) (delta / max) * 255.0f;
+
+      //put HSV value into result buffer
+      result[i * width + j] = h;
+      result[i * width + j + img_size] = s;
+      result[i * width + j + img_size + img_size] = v;
+    }
+  }
+
+  _dst = qivon::Image<unsigned char>(width, height, 3, qivon::Type_HSV, result);
+}
+
 void build_gamma_correction_LUT(unsigned char *table, float _gamma_correction) {
   for (size_t i = 0; i < 256; ++i) {
     table[i] = (unsigned char) (255.0f * std::pow((float)i / 255.0f, _gamma_correction));
