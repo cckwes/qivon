@@ -254,6 +254,90 @@ void rgb_to_hsv(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
   _dst = qivon::Image<unsigned char>(width, height, 3, qivon::Type_HSV, result);
 }
 
+void hsv_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+  //check input image empty
+  if (_src.isEmpty()) {
+    std::cerr << "empty image in " << __FUNCTION__ << std::endl;
+    return;
+  }
+
+  //check input color type and number of channels
+  if (_src.color() != qivon::Type_HSV || _src.channels() != 3) {
+    std::cerr << "input color type not hsv in " << __FUNCTION__ << std::endl;
+    return;
+  }
+
+  size_t width = _src.width();
+  size_t height = _src.height();
+  size_t img_size = width * height;
+  unsigned char *source_data = _src.data();
+
+  unsigned char *result = (unsigned char *) malloc(img_size * 3);
+
+  for (size_t i = 0; i < height; ++i) {
+    for (size_t j = 0; j < width; ++j) {
+      float h = (float) source_data[i * width + j] * 1.4117647f;   //is /255*360
+      float s = (float) source_data[i * width + j + img_size] / 255.0f;
+      float v = (float) source_data[i * width + j + img_size + img_size] / 255.0f;
+
+      unsigned char r, g, b;
+      if (s == 0) {
+        r = g = b = 0;
+      } else {
+        int sector = std::floor(h / 60.0f);
+        float f = h / 60.0f - sector;
+        float p = v * (1.0f - s);
+        float q = v * (1.0f - s * f);
+        float t = v * (1.0f - s * (1.0f - f));
+
+        switch (sector) {
+          case 0:
+            r = (unsigned char) (v * 255.0f);
+            g = (unsigned char) (t * 255.0f);
+            b = (unsigned char) (p * 255.0f);
+            break;
+
+          case 1:
+            r = (unsigned char) (q * 255.0f);
+            g = (unsigned char) (v * 255.0f);
+            b = (unsigned char) (p * 255.0f);
+            break;
+
+          case 2:
+            r = (unsigned char) (p * 255.0f);
+            g = (unsigned char) (v * 255.0f);
+            b = (unsigned char) (t * 255.0f);
+            break;
+
+          case 3:
+            r = (unsigned char) (p * 255.0f);
+            g = (unsigned char) (q * 255.0f);
+            b = (unsigned char) (v * 255.0f);
+            break;
+
+          case 4:
+            r = (unsigned char) (t * 255.0f);
+            g = (unsigned char) (p * 255.0f);
+            b = (unsigned char) (v * 255.0f);
+            break;
+
+          default:
+            r = (unsigned char) (v * 255.0f);
+            g = (unsigned char) (p * 255.0f);
+            b = (unsigned char) (q * 255.0f);
+            break;
+        }
+      }
+
+      result[i * width + j] = r;
+      result[i * width + j + img_size] = g;
+      result[i * width + j + img_size + img_size] = b;
+    }
+  }
+
+  _dst = Image<unsigned char>(width, height, 3, Type_RGB, result);
+}
+
 void build_gamma_correction_LUT(unsigned char *table, float _gamma_correction) {
   for (size_t i = 0; i < 256; ++i) {
     table[i] = (unsigned char) (255.0f * std::pow((float)i / 255.0f, _gamma_correction));
