@@ -57,7 +57,7 @@ Image<unsigned char> readPngFile(const std::string &filename) {
   png_byte color_type = png_get_color_type(png_ptr, info_ptr);
   png_byte bit_depth = png_get_bit_depth(png_ptr, info_ptr);
 
-  int number_of_passes = png_set_interlace_handling(png_ptr);
+//  int number_of_passes = png_set_interlace_handling(png_ptr);
   png_read_update_info(png_ptr, info_ptr);
 
   //start reading the content
@@ -88,7 +88,7 @@ Image<unsigned char> readPngFile(const std::string &filename) {
 
   size_t row_bytes = png_get_rowbytes(png_ptr, info_ptr);
 
-  for (int y = 0; y < height; ++y) {
+  for (size_t y = 0; y < height; ++y) {
     row_pointers[y] = (png_byte *) malloc(row_bytes);
   }
 
@@ -100,10 +100,10 @@ Image<unsigned char> readPngFile(const std::string &filename) {
 
   //copy buffer into image data
   unsigned char *image_data = (unsigned char *) malloc(row_bytes * height);
-  for (int y = 0; y < height; ++y) {
+  for (size_t y = 0; y < height; ++y) {
     const png_byte *row = row_pointers[y];
 
-    for (int x = 0; x < width; ++x) {
+    for (size_t x = 0; x < width; ++x) {
       if (color_type == PNG_COLOR_TYPE_GRAY) {
         image_data[y * width + x] = row[x];
       } else if (color_type == PNG_COLOR_TYPE_RGB) {
@@ -120,7 +120,7 @@ Image<unsigned char> readPngFile(const std::string &filename) {
   }
 
   //cleanup
-  for (int y = 0; y < height; ++y) {
+  for (size_t y = 0; y < height; ++y) {
     free(row_pointers[y]);
   }
   free(row_pointers);
@@ -235,11 +235,11 @@ bool writePngFile(const std::string &filename, Image<unsigned char> &image) {
 
   size_t image_size = width * height;
 
-  for (int y = 0; y < height; ++y) {
+  for (size_t y = 0; y < height; ++y) {
     row_pointers[y] = (png_byte *) malloc(row_bytes);
     png_byte *row = row_pointers[y];
 
-    for (int x = 0; x < width; ++x) {
+    for (size_t x = 0; x < width; ++x) {
       if (image.channels() == 1) {
         row[x] = image_data[y * width + x];
       } else if (image.channels() == 3) {
@@ -266,7 +266,7 @@ bool writePngFile(const std::string &filename, Image<unsigned char> &image) {
   png_write_end(png_ptr, NULL);
 
   //cleanup
-  for (int y = 0; y < height; ++y)
+  for (size_t y = 0; y < height; ++y)
     free(row_pointers[y]);
   free(row_pointers);
 

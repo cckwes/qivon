@@ -19,7 +19,7 @@ void rgb_to_grayscale_8u(unsigned char* _src, unsigned char* _dst, size_t _width
 
   const size_t img_size = _width * _height;
 
-  for (int i = 0; i < img_size; ++i) {
+  for (size_t i = 0; i < img_size; ++i) {
     r_muliply[i] = (unsigned char) ((float) _src[i] * 0.2126f);
     g_muliply[i] = (unsigned char) ((float) _src[i + img_size] * 0.7152f);
     b_muliply[i] = (unsigned char) ((float) _src[i + 2 * img_size] * 0.0722f);
@@ -28,7 +28,7 @@ void rgb_to_grayscale_8u(unsigned char* _src, unsigned char* _dst, size_t _width
   size_t length = img_size;
 
   int start_of_remaining = 0;
-  for (int i = 0; i < (length - 16); i += 16) {
+  for (size_t i = 0; i < (length - 16); i += 16) {
     __m128i r_vec = _mm_loadu_si128((__m128i*) &r_muliply[i]);
     __m128i g_vec = _mm_loadu_si128((__m128i*) &g_muliply[i]);
     __m128i b_vec = _mm_loadu_si128((__m128i*) &b_muliply[i]);
@@ -48,7 +48,7 @@ void rgb_to_grayscale_8u(unsigned char* _src, unsigned char* _dst, size_t _width
   size_t remaining = length % 16;
 
   if (remaining != 0) {
-    for (int i = start_of_remaining; i < length; ++i) {
+    for (size_t i = start_of_remaining; i < length; ++i) {
       _dst[i] = r_muliply[i] + g_muliply[i] + b_muliply[i];
     }
   }
@@ -61,7 +61,7 @@ void bgr_to_grayscale_8u(unsigned char* _src, unsigned char* _dst, size_t _width
 
   const size_t img_size = _width * _height;
 
-  for (int i = 0; i < img_size; ++i) {
+  for (size_t i = 0; i < img_size; ++i) {
     b_muliply[i] = (unsigned char) ((float) _src[i] * 0.0722f);
     g_muliply[i] = (unsigned char) ((float) _src[i + img_size] * 0.7152f);
     r_muliply[i] = (unsigned char) ((float) _src[i + 2 * img_size] * 0.2126f);
@@ -70,7 +70,7 @@ void bgr_to_grayscale_8u(unsigned char* _src, unsigned char* _dst, size_t _width
   size_t length = img_size;
 
   int start_of_remaining = 0;
-  for (int i = 0; i < (length - 16); i += 16) {
+  for (size_t i = 0; i < (length - 16); i += 16) {
     __m128i r_vec = _mm_loadu_si128((__m128i*) &r_muliply[i]);
     __m128i g_vec = _mm_loadu_si128((__m128i*) &g_muliply[i]);
     __m128i b_vec = _mm_loadu_si128((__m128i*) &b_muliply[i]);
@@ -90,7 +90,7 @@ void bgr_to_grayscale_8u(unsigned char* _src, unsigned char* _dst, size_t _width
   size_t remaining = length % 16;
 
   if (remaining != 0) {
-    for (int i = start_of_remaining; i < length; ++i) {
+    for (size_t i = start_of_remaining; i < length; ++i) {
       _dst[i] = r_muliply[i] + g_muliply[i] + b_muliply[i];
     }
   }
@@ -592,8 +592,8 @@ bool white_balance_adjustment(Image<unsigned char> &_src,
 
   unsigned char *result = (unsigned char*) malloc(img_size * _src.channels());
 
-  for (int i = 0; i < height; ++i) {
-    for (int j = 0; j < width; ++j) {
+  for (size_t i = 0; i < height; ++i) {
+    for (size_t j = 0; j < width; ++j) {
       result[i * width + j] = r_lut[source_data[i * width + j]];
       result[i * width + j + img_size] = g_lut[source_data[i * width + j + img_size]];
       result[i * width + j + img_size + img_size] = b_lut[source_data[i * width + j + img_size + img_size]];
@@ -730,8 +730,8 @@ bool saturation_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_ds
 
   unsigned char *result = (unsigned char *) malloc(img_size * 3);
 
-  for (int i = 0; i < height; ++i) {
-    for (int j = 0; j < width; ++j) {
+  for (size_t i = 0; i < height; ++i) {
+    for (size_t j = 0; j < width; ++j) {
       size_t data_loc = i * width + j;
       //copy the hue
       result[data_loc] = source_data[data_loc];

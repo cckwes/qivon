@@ -65,7 +65,7 @@ void meanFilter3x3_ch1_separable(Image<unsigned char> &_src,
   unsigned char *temporary = (unsigned char *) malloc(image_size * sizeof(unsigned char));
   unsigned char *result = (unsigned char *) malloc(image_size * sizeof(unsigned char));
 
-  for (int i = 0; i < height; ++i) {
+  for (size_t i = 0; i < height; ++i) {
     for (int j = 0; j < width; ++j) {
       int previous_u = j - 1 >= 0 ? j - 1 : 1;
       int next_u = j + 1 < width ? j + 1 : width - 2;
@@ -76,7 +76,7 @@ void meanFilter3x3_ch1_separable(Image<unsigned char> &_src,
   }
 
   for (int i = 0; i < height; ++i) {
-    for (int j = 0; j < width; ++j) {
+    for (size_t j = 0; j < width; ++j) {
       int previous_v = i - 1 >= 0 ? i - 1 : 1;
       int next_v = i + 1 < height ? i + 1: height - 2;
 

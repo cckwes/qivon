@@ -92,7 +92,7 @@ Image<unsigned char> readJpgFile(const std::string &filename) {
   while (cinfo.output_scanline < height) {
     (void) jpeg_read_scanlines(&cinfo, buffer, 1);
 
-    for (int x = 0; x < width; ++x) {
+    for (size_t x = 0; x < width; ++x) {
       image_data[y * width + x] = buffer[0][3 * x];
       image_data[image_size + y * width + x] = buffer[0][3 * x + 1];
       image_data[2 * image_size + y * width + x] = buffer[0][3 * x + 2];
@@ -165,7 +165,7 @@ bool writeJpgFile(const std::string &filename,
 
     row_stride = image.width() * 3;
 
-  } else if (image.channels() == 1) {
+  } else {      //channel is 1
     cinfo.input_components = 1;
     cinfo.in_color_space = JCS_GRAYSCALE;
 
@@ -184,7 +184,7 @@ bool writeJpgFile(const std::string &filename,
 
   size_t current_height = 0;
   while (cinfo.next_scanline < cinfo.image_height) {
-    for (int i = 0; i < image.width(); ++i) {
+    for (size_t i = 0; i < image.width(); ++i) {
       if (image.channels() == 3) {
         //green buffer at same location for BGR and RGB
         buffer[i * 3 + 1] = image_buffer[current_height * width + i + image_size];

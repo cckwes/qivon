@@ -62,9 +62,9 @@ void resizeImage(Image<T> &_src, Image<T> &_dst,
   T *result = (T*) malloc(_width * _height * channels * sizeof(T));
 
   //loop through every destination pixel
-  for (int i = 0; i < _height; ++i) {
+  for (size_t i = 0; i < _height; ++i) {
     float v = i * ratio_height;
-    for (int j = 0; j < _width; ++j) {
+    for (size_t j = 0; j < _width; ++j) {
       float u = j * ratio_width;
 
       size_t u_discrete = std::floor(u);
@@ -102,8 +102,8 @@ void resizeImage(Image<T> &_src, Image<T> &_dst,
         T data[4][4];
 
         //get the data
-        for (int k = start_y; k <= end_y; ++k) {
-          for (int l = start_x; l <= end_x; ++l) {
+        for (size_t k = start_y; k <= end_y; ++k) {
+          for (size_t l = start_x; l <= end_x; ++l) {
             data[k - start_y][l - start_x] =
                 original_data[k * original_width + l + ch * original_image_size];
           }
