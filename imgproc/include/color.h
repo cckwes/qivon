@@ -39,7 +39,7 @@ QIVON_EXPORT bool white_balance_adjustment(Image<unsigned char> &_src,
 
 QIVON_EXPORT bool hue_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int _value);
 
-QIVON_EXPORT void saturation_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int _value);
+QIVON_EXPORT bool saturation_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int _value);
 }
 
 #endif  //QIVON_COLOR_H

@@ -613,7 +613,7 @@ bool hue_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int 
   }
 
   //check value out of range
-  if (-100 < _value || _value < 100) {
+  if (-100 > _value || _value > 100) {
     std::cerr << "value out of range in " << __FUNCTION__ << std::endl;
     return false;
   }
@@ -637,7 +637,7 @@ bool hue_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int 
   size_t height = _src.height();
   size_t img_size = width * height;
   unsigned char *source_data = hsv_img.data();
-  int hue_change = (int) (float(_value) * 1.28);
+  int hue_change = (int) (float(_value) * 1.28f);
 
   unsigned char *result = (unsigned char *) malloc(img_size * 3);
 
@@ -656,6 +656,72 @@ bool hue_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int 
 
   if (_src.color() == Type_HSV)
     _dst = Image<unsigned char>(width, height, 3, Type_HSV, result);
+  else {
+    Image<unsigned char> hsv_result = Image<unsigned char>(width, height, 3, Type_HSV, result);
+    hsv_to_rgb(hsv_result, _dst);
+  }
+
+  return true;
+}
+
+bool saturation_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int _value) {
+  //check image empty
+  if (_src.isEmpty()) {
+    std::cerr << "source image empty in " << __FUNCTION__ << std::endl;
+    return false;
+  }
+
+  //check value out of range
+  if (-100 > _value || _value > 100) {
+    std::cerr << "value out of range in " << __FUNCTION__ << std::endl;
+    return false;
+  }
+
+  //check color type and channel
+  if (_src.color() != Type_HSV && _src.color() != Type_RGB
+      && _src.channels() != 3) {
+    std::cerr << "image type must be hsv or rgb in " << __FUNCTION__ << std::endl;
+    return false;
+  }
+
+  Image<unsigned char> hsv_img;
+  if (_src.color() == Type_HSV)
+    hsv_img = _src;
+  else
+    rgb_to_hsv(_src, hsv_img);
+
+  size_t width = _src.width();
+  size_t height = _src.height();
+  size_t img_size = width * height;
+  unsigned char *source_data = hsv_img.data();
+  int saturation_change = (int) ((float)_value * 1.28f);
+
+  //build the lookup table for saturation change
+  unsigned char saturation_change_lut[256];
+  for (int i = 0; i < 256; ++i) {
+    saturation_change_lut[i] = (unsigned char) std::min(0, std::max(255, i + saturation_change));
+  }
+
+  unsigned char *result = (unsigned char *) malloc(img_size * 3);
+
+  for (int i = 0; i < height; ++i) {
+    for (int j = 0; j < width; ++j) {
+      size_t data_loc = i * width + j;
+      //copy the hue
+      result[data_loc] = source_data[data_loc];
+
+      //apply the saturation change
+      data_loc += img_size;
+      result[data_loc] = saturation_change_lut[source_data[data_loc]];
+
+      //copy the value
+      data_loc += img_size;
+      result[data_loc] = source_data[data_loc];
+    }
+  }
+
+  if (_src.color() == Type_HSV)
+    _dst = qivon::Image<unsigned char>(width, height, 3, Type_HSV, result);
   else {
     Image<unsigned char> hsv_result = Image<unsigned char>(width, height, 3, Type_HSV, result);
     hsv_to_rgb(hsv_result, _dst);
