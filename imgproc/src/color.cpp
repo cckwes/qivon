@@ -641,7 +641,33 @@ bool hue_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int 
 
   unsigned char *result = (unsigned char *) malloc(img_size * 3);
 
-  for (size_t i = 0; i < height; ++i) {
+  __m128i hue_value = _mm_set1_epi8(hue_change);
+
+  size_t i;
+  //use SSE to add the hue chane value to hue
+  for (i = 0; i < (img_size - 16); i += 16) {
+    __m128i src_vec = _mm_loadu_si128((__m128i*) &source_data[i]);
+    __m128i result_vec = _mm_adds_epu8(src_vec, hue_value);
+
+    unsigned char *res = (unsigned char *) &result_vec;
+
+    for (size_t j = 0; j < 16; ++j) {
+      result[i + j] = res[j];
+    }
+  }
+
+  //add the remaining <16 hue
+  for (; i < img_size; ++i) {
+    result[i] = (unsigned char) std::min(0, std::max(255, (int)source_data[i] + hue_change));
+  }
+
+  //copy the saturation and value to the result buffer
+  size_t total_img_size = 3 * img_size;
+  for (i = img_size; i < total_img_size; ++i) {
+    result[i] = source_data[i];
+  }
+
+  /*for (size_t i = 0; i < height; ++i) {
     for (size_t j = 0; j < width; ++j) {
       size_t data_loc = i * width + j;
       result[data_loc] = (unsigned char) std::min(0, std::max(255, (int)source_data[data_loc] + hue_change));
@@ -652,7 +678,7 @@ bool hue_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int 
       data_loc += img_size;
       result[data_loc] = source_data[data_loc];
     }
-  }
+  }*/
 
   if (_src.color() == Type_HSV)
     _dst = Image<unsigned char>(width, height, 3, Type_HSV, result);
