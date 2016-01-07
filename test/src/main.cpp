@@ -60,6 +60,44 @@ int main(int argc, char *argv[]) {
 
 
   ///////////////////////
+  // test hue and
+  // saturation adjustment
+  ///////////////////////
+  {
+    const size_t run_time = 10;
+
+    qivon::Image<unsigned char> hue;
+    qivon::Image<unsigned char> saturation;
+
+    auto start = std::chrono::system_clock::now();
+
+    for (size_t i = 0; i < run_time; ++i) {
+      qivon::hue_adjustment(img, hue, 50);
+    }
+
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
+        (std::chrono::system_clock::now() - start);
+
+    std::cout << "Hue adjustment uses (avg) " << elapsed.count() / run_time << "\n";
+
+    start = std::chrono::system_clock::now();
+
+    for (size_t i = 0; i < run_time; ++i) {
+      qivon::saturation_adjustment(img, saturation, 50);
+    }
+
+    elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
+        (std::chrono::system_clock::now() - start);
+
+    std::cout << "Saturation adjustment uses (avg) " << elapsed.count() / run_time << "\n";
+
+    qivon::writePngFile("hue.png", hue);
+    qivon::writePngFile("saturation.png", saturation);
+  }
+  ///////////////////////
+
+
+  ///////////////////////
   // test convert
   // to grayscale
   ///////////////////////
