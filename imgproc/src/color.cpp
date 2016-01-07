@@ -209,14 +209,14 @@ void rgb_to_hsv(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
 
   for (size_t i = 0; i < height; ++i) {
     for (size_t j = 0; j < width; ++j) {
-      int r, g, b;
-      r = (float) source_data[i * width + j] / 255.0f;
-      g = (float) source_data[i * width + j + img_size] / 255.0f;
-      b = (float) source_data[i * width + j + img_size + img_size] / 255.0f;
+      float r, g, b;
+      r = float(source_data[i * width + j]) / 255.0f;
+      g = float(source_data[i * width + j + img_size]) / 255.0f;
+      b = float(source_data[i * width + j + img_size + img_size]) / 255.0f;
 
       float min, max, delta;
-      min = (float) std::min(r, std::min(g, b));
-      max = (float) std::max(r, std::max(g, b));
+      min = std::min(r, std::min(g, b));
+      max = std::max(r, std::max(g, b));
       delta = max - min;
 
       //get the V value
@@ -242,7 +242,7 @@ void rgb_to_hsv(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
       if (max == 0)
         s = 0;
       else
-        s = (unsigned char) (delta / max) * 255.0f;
+        s = (unsigned char) ((delta / max) * 255.0f);
 
       //put HSV value into result buffer
       result[i * width + j] = h;
@@ -276,9 +276,9 @@ void hsv_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
 
   for (size_t i = 0; i < height; ++i) {
     for (size_t j = 0; j < width; ++j) {
-      float h = (float) source_data[i * width + j] * 1.4117647f;   //is /255*360
-      float s = (float) source_data[i * width + j + img_size] / 255.0f;
-      float v = (float) source_data[i * width + j + img_size + img_size] / 255.0f;
+      float h = float(source_data[i * width + j]) * 1.4117647f;   //is /255*360
+      float s = float(source_data[i * width + j + img_size]) / 255.0f;
+      float v = float(source_data[i * width + j + img_size + img_size]) / 255.0f;
 
       unsigned char r, g, b;
       if (s == 0) {
@@ -725,7 +725,7 @@ bool saturation_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_ds
   //build the lookup table for saturation change
   unsigned char saturation_change_lut[256];
   for (int i = 0; i < 256; ++i) {
-    saturation_change_lut[i] = (unsigned char) std::min(0, std::max(255, i + saturation_change));
+    saturation_change_lut[i] = (unsigned char) std::max(0, std::min(255, i + saturation_change));
   }
 
   unsigned char *result = (unsigned char *) malloc(img_size * 3);
@@ -738,7 +738,8 @@ bool saturation_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_ds
 
       //apply the saturation change
       data_loc += img_size;
-      result[data_loc] = saturation_change_lut[source_data[data_loc]];
+      unsigned char val = source_data[data_loc];
+      result[data_loc] = saturation_change_lut[val];
 
       //copy the value
       data_loc += img_size;
