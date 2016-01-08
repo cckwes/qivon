@@ -338,6 +338,74 @@ void hsv_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
   _dst = Image<unsigned char>(width, height, 3, Type_RGB, result);
 }
 
+void rgb_to_hsl(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+  //check image empty
+  if (_src.isEmpty()) {
+    std::cerr << "empty image in " << __FUNCTION__ << std::endl;
+    return;
+  }
+
+  //check image type and channels
+  if (_src.color() != Type_RGB || _src.channels() != 3) {
+    std::cerr << "input color type not hsv in " << __FUNCTION__ << std::endl;
+    return;
+  }
+
+  size_t width = _src.width();
+  size_t height = _src.height();
+  size_t img_size = width * height;
+  unsigned char *source_data = _src.data();
+  unsigned char *result = (unsigned char *) malloc(img_size * 3);
+
+  for (size_t i = 0; i < height; ++i) {
+    for (size_t j = 0; j < width; ++j) {
+      float r, g, b;
+      r = float(source_data[i * width + j]) / 255.0f;
+      g = float(source_data[i * width + j + img_size]) / 255.0f;
+      b = float(source_data[i * width + j + img_size + img_size]) / 255.0f;
+
+      float min, max, delta;
+      min = std::min(r, std::min(g, b));
+      max = std::max(r, std::max(g, b));
+      delta = max - min;
+
+      //get the L value
+      unsigned char l = (unsigned char) ((max + min) / 2.0f * 255.0f);
+
+      //get the S value
+      unsigned char s;
+      if (delta == 0)
+        s = 0;
+      else
+        s = (unsigned char) (delta / 1.0 - std::fabsf(max + min - 1));
+
+      //get the H value
+      float f_h;
+      if (delta == 0)
+        f_h = 0;
+      else if (max == r)
+        f_h = 60.0f * (g - b) / delta;
+      else if (max == g)
+        f_h = 120.0f + 60.0f * (b - r) / delta;
+      else                              //max == b
+        f_h = 240.0f + 60.0f * (r - g) / delta;
+      if (f_h < 0)
+        f_h += 360.0f;
+      unsigned char h = (unsigned char) f_h / 360.0f * 255.0f;
+
+      //put HSL into result buffer
+      size_t data_loc = i * width + j;
+      result[data_loc] = h;
+      data_loc += img_size;
+      result[data_loc] = s;
+      data_loc += img_size;
+      result[data_loc] = l;
+    }
+  }
+
+  _dst = Image<unsigned char>(width, height, 3, Type_HSL, result);
+}
+
 void build_gamma_correction_LUT(unsigned char *table, float _gamma_correction) {
   for (size_t i = 0; i < 256; ++i) {
     table[i] = (unsigned char) (255.0f * std::pow((float)i / 255.0f, _gamma_correction));

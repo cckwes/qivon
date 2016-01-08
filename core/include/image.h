@@ -13,7 +13,8 @@ enum ColorType {
   Type_RGB = 1,
   Type_BGR = 2,
   Type_RGBA = 3,
-  Type_HSV = 4
+  Type_HSV = 4,
+  Type_HSL = 5
 };
 
 template<class T>
