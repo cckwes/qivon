@@ -347,7 +347,7 @@ void rgb_to_hsl(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
 
   //check image type and channels
   if (_src.color() != Type_RGB || _src.channels() != 3) {
-    std::cerr << "input color type not hsv in " << __FUNCTION__ << std::endl;
+    std::cerr << "input color type not rgb in " << __FUNCTION__ << std::endl;
     return;
   }
 
@@ -404,6 +404,95 @@ void rgb_to_hsl(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
   }
 
   _dst = Image<unsigned char>(width, height, 3, Type_HSL, result);
+}
+
+void hsl_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+  //check image empty
+  if (_src.isEmpty()) {
+    std::cerr << "empty image in " << __FUNCTION__ << std::endl;
+    return;
+  }
+
+  //check image channel and color type
+  if (_src.color() != Type_HSL || _src.channels() != 3) {
+    std::cerr << "input color type not hsv in " << __FUNCTION__ << std::endl;
+    return;
+  }
+
+  size_t width = _src.width();
+  size_t height = _src.height();
+  size_t img_size = width * height;
+  unsigned char *source_data = _src.data();
+
+  unsigned char *result = (unsigned char *) malloc(img_size * 3);
+
+  for (size_t i = 0; i < height; ++i) {
+    for (size_t j = 0; j < width; ++j) {
+      unsigned char r, g, b;
+
+      //get the hsl value from source data
+      size_t data_loc = i * width + j;
+      float h = float(source_data[data_loc]) * 1.4117647f;   //is /255*360
+      data_loc += img_size;
+      float s = float(source_data[data_loc]) / 255.0f;
+      data_loc += img_size;
+      float l = float(source_data[data_loc]) / 255.0f;
+
+      float chroma = (1.0f - std::fabsf(2 * l - 1)) * s;
+      int sector = std::floor(h / 60.0f);
+      float x = chroma * (1.0f - std::fabsf(std::fmodf((h / 60.0f), 2) - 1.0f));
+
+      unsigned char m = (unsigned char) (l - 0.5 * chroma);
+      unsigned char c = (unsigned char) chroma;
+      unsigned char X = (unsigned char) x;
+
+      switch (sector) {
+        case 0:
+          r = c + m;
+          g = X + m;
+          b = m;
+          break;
+
+        case 1:
+          r = X + m;
+          g = c + m;
+          b = m;
+          break;
+
+        case 2:
+          r = m;
+          g = c + m;
+          b = X + m;
+          break;
+
+        case 3:
+          r = m;
+          g = X + m;
+          b = c + m;
+          break;
+
+        case 4:
+          r = X + m;
+          g = m;
+          b = c + m;
+
+        default:
+          r = c + m;
+          g = m;
+          b = X + m;
+          break;
+      }
+
+      data_loc = i * width + j;
+      result[data_loc] = r;
+      data_loc += img_size;
+      result[data_loc] = g;
+      data_loc += img_size;
+      result[data_loc] = b;
+    }
+  }
+
+  _dst = Image<unsigned char>(width, height, 3, Type_RGB, result);
 }
 
 void build_gamma_correction_LUT(unsigned char *table, float _gamma_correction) {
