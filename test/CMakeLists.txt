@@ -10,9 +10,17 @@ include_directories(
         ${qivon_core_SOURCE_DIR}/include
         ${qivon_io_SOURCE_DIR}/include
         ${qivon_imgproc_SOURCE_DIR}/include
+        ${test_SOURCE_DIR}/include
 )
 
-set(SOURCES src/main.cpp)
+set(SOURCES
+        src/main.cpp
+        src/test_color.cpp
+        )
 
-add_executable(test ${SOURCES})
+set(HEADERS
+        include/test_color.h
+        )
+
+add_executable(test ${SOURCES} ${HEADERS})
 target_link_libraries(test qivon_core qivon_io qivon_imgproc)
