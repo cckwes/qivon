@@ -16,10 +16,12 @@ include_directories(
 set(SOURCES
         src/main.cpp
         src/test_color.cpp
+	src/test_io.cpp
         )
 
 set(HEADERS
         include/test_color.h
+	include/test_io.h
         )
 
 add_executable(test ${SOURCES} ${HEADERS})
