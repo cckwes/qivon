@@ -19,6 +19,7 @@ set(SOURCES
         src/test_color.cpp
 	src/test_io.cpp
 	src/test_filter.cpp
+	src/test_geometry.cpp
         )
 
 set(HEADERS
@@ -26,6 +27,7 @@ set(HEADERS
         include/test_color.h
 	include/test_io.h
 	include/test_filter.h
+	include/test_geometry.h
         )
 
 add_executable(test ${SOURCES} ${HEADERS})
