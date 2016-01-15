@@ -1,12 +1,25 @@
 #include <iostream>
-#include <chrono>
-
-#include <image.h>
 #include <pngio.h>
 #include <jpgio.h>
 #include <color.h>
-#include <filter.h>
-#include <geometry.h>
+
+#include "test_io.h"
+#include "test_geometry.h"
+#include "test_filter.h"
+#include "test_color.h"
+
+int g_test_count = 0;
+int g_test_failed = 0;
+int g_test_succeed = 0;
+
+void update_test_counter(bool succeed) {
+  ++g_test_count;
+
+  if (succeed)
+    ++g_test_succeed;
+  else
+    ++g_test_failed;
+}
 
 int main(int argc, char *argv[]) {
 
@@ -15,6 +28,10 @@ int main(int argc, char *argv[]) {
   // and save
   // PNG image
   ///////////////////////
+  bool rst;
+  int run_time = 10;
+
+  //read in an image for future testing
   qivon::Image<unsigned char> img = qivon::readPngFile("wallpaper.png");
 
   //output the information of opened image
@@ -22,208 +39,82 @@ int main(int argc, char *argv[]) {
   std::cout << "Channels: " << img.channels() << "\n";
   std::cout << "Image is empty: " << img.isEmpty() << "\n";
 
-  //export image
-  bool rst = qivon::writePngFile("result.png", img);
+  ////////////////////////////////////
+  // IO Test
+  ////////////////////////////////////
+  //test import png image
+  update_test_counter(test_read_png("wallpaper.png"));
 
-  if (rst)
-    std::cout << "Image exported successfully\n";
-  else
-    std::cout << "Problem encountered when export image\n";
+  //test export png image
+  update_test_counter(test_write_png("result.png", img));
 
-  qivon::Image<unsigned char> img_deep_copy = img.deepCopy();
-  qivon::writePngFile("deep_copy.png", img_deep_copy);
+  //test import jpg image
+  update_test_counter(test_read_jpg("wallpaper.jpg"));
 
-  qivon::Image<unsigned char> resized_img;
-  qivon::resizeImage(img, resized_img, 400, 300, true);
-  qivon::writePngFile("resized.png", resized_img);
-
-  qivon::Image<unsigned char> cropped_img;
-  qivon::cropImage(img, cropped_img, 192, 108, 1536, 864);
-  qivon::writePngFile("cropped.png", cropped_img);
-  ///////////////////////
+  //test export jpg image
+  update_test_counter(test_write_jpg("result.jpg", img, 85));
+  ////////////////////////////////////
 
 
-  ///////////////////////
-  // test white balance
-  // at diff temperature
-  ///////////////////////
-  int temperature[4] = {1850, 3200, 6500, 15000};
-  std::string output_filenames[4] = {"wb_1850.jpg", "wb_3200.jpg",
-                                     "wb_6500.jpg", "wb_15000.jpg"};
+  ////////////////////////////////////
+  //Geometry Test
+  ////////////////////////////////////
+  //test resize image
+  update_test_counter(test_resize_image(img, 400, 300));
 
-  for (int i = 0; i < 4; ++i) {
-    qivon::Image<unsigned char> wb_tuned;
-    qivon::white_balance_adjustment(img, wb_tuned, temperature[i]);
-    qivon::writeJpgFile(output_filenames[i], wb_tuned);
-  }
-  ///////////////////////
+  //test crop image
+  update_test_counter(test_crop_image(img, 192, 108, 1536, 864));
+  ////////////////////////////////////
 
 
-  ///////////////////////
-  // test hue and
-  // saturation adjustment
-  ///////////////////////
-  {
-    const size_t run_time = 10;
-
-    qivon::Image<unsigned char> hue;
-    qivon::Image<unsigned char> saturation;
-
-    auto start = std::chrono::system_clock::now();
-
-    for (size_t i = 0; i < run_time; ++i) {
-      qivon::hue_adjustment(img, hue, 50);
-    }
-
-    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
-        (std::chrono::system_clock::now() - start);
-
-    std::cout << "Hue adjustment uses (avg) " << elapsed.count() / run_time << "\n";
-
-    start = std::chrono::system_clock::now();
-
-    for (size_t i = 0; i < run_time; ++i) {
-      qivon::saturation_adjustment(img, saturation, 50);
-    }
-
-    elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
-        (std::chrono::system_clock::now() - start);
-
-    std::cout << "Saturation adjustment uses (avg) " << elapsed.count() / run_time << "\n";
-
-    qivon::writePngFile("hue.png", hue);
-    qivon::writePngFile("saturation.png", saturation);
-  }
-  ///////////////////////
+  ////////////////////////////////////
+  //Filter Test
+  ////////////////////////////////////
+  //test mean filter 3x3
+  update_test_counter(test_mean_filter_3x3(img, run_time));
+  ////////////////////////////////////
 
 
-  ///////////////////////
-  // test convert
-  // to grayscale
-  ///////////////////////
-  qivon::Image<unsigned char> grayscale_img;
-  qivon::toGrayscale(img, grayscale_img);
 
-  rst = qivon::writePngFile("grayscale.png", grayscale_img);
+  ////////////////////////////////////
+  // Color Test
+  ////////////////////////////////////
+  //test convert to grayscale
+  update_test_counter(test_to_grayscale(img, run_time));
 
-  if (rst)
-    std::cout << "Grayscale image exported successfully\n";
-  else
-    std::cout << "Problem encountered when export grayscale image\n";
-  ///////////////////////
+  //test convert from rgb to bgr
+  update_test_counter(test_rgb_to_bgr(img, run_time));
 
+  qivon::Image<unsigned char> bgr;
+  qivon::rgb_to_bgr(img, bgr);
 
-  ///////////////////////
-  // mean filter image
-  ///////////////////////
-  qivon::Image<unsigned char> filtered_img;
-  qivon::meanFilter3x3(grayscale_img, filtered_img);
+  //test convert bgr to rgb
+  update_test_counter(test_bgr_to_rgb(bgr, run_time));
 
-  if (!filtered_img.isEmpty()) {
-    rst = qivon::writeJpgFile("mean.jpg", filtered_img);
+  //test gamma correction
+  update_test_counter(test_gamma_correction(img, 1.5, run_time));
 
-    if (rst)
-      std::cout << "Mean image exported successfully\n";
-    else
-      std::cout << "Problem encountered when export mean image\n";
-  }
-  ///////////////////////
+  //test brightness adjustment
+  update_test_counter(test_brightness_adjustment(img, 50, run_time));
 
+  //test contrast adjustment
+  update_test_counter(test_contrast_adjustment(img, 110, run_time));
 
-  ///////////////////////
-  // test open JPEG
-  // and export JPEG
-  ///////////////////////
-  img = qivon::readJpgFile("wallpaper.jpg");
+  //test white balance adjustment
+  update_test_counter(test_white_balance_adjustment(img, 15000, run_time));
 
-  std::cout << "The dimension of image return is: " << img.width() << ", " << img.height() << "\n";
-  std::cout << "Channels: " << img.channels() << "\n";
-  std::cout << "Image is empty: " << img.isEmpty() << "\n";
+  //test hue adjustment
+  update_test_counter(test_hue_adjustment(img, 50, run_time));
 
-  rst = qivon::writeJpgFile("from_jpg.jpg", img, 80);
-
-  if (rst)
-    std::cout << "Image exported successfully\n";
-  else
-    std::cout << "Problem encountered when export image\n";
-  ///////////////////////
+  //test saturation adjustment
+  update_test_counter(test_saturation_adjustment(img, 50, run_time));
+  ////////////////////////////////////
 
 
-  ///////////////////////
-  // test gamma correction
-  ///////////////////////
-  const size_t run_time = 10;
-
-  qivon::Image<unsigned char> gamma;
-
-  auto start = std::chrono::system_clock::now();
-
-  for (size_t i = 0; i < run_time; ++i) {
-    qivon::gamma_correction(img, gamma, 1.5);
-  }
-
-  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
-      (std::chrono::system_clock::now() - start);
-
-  std::cout << "Naive gamma corection uses (avg) " << elapsed.count() / run_time << "\n";
-
-  start = std::chrono::system_clock::now();
-
-  for (size_t i = 0; i < run_time; ++i) {
-    qivon::gamma_correction_LUT(img, gamma, 1.5);
-  }
-
-  elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
-      (std::chrono::system_clock::now() - start);
-
-  std::cout << "LUT gamma corection uses (avg) " << elapsed.count() / run_time << "\n";
-
-  rst = qivon::writePngFile("gamma.png", gamma);
-
-  if (rst)
-    std::cout << "Image exported successfully\n";
-  else
-    std::cout << "Problem encountered when export image\n";
-  ///////////////////////
-
-  ///////////////////////
-  // test brightness
-  // adjustment
-  ///////////////////////
-  img = qivon::readJpgFile("wallpaper.jpg");
-
-  qivon::Image<unsigned char> brightness;
-  qivon::brightness_adjustment(img, brightness, 50);
-
-  rst = qivon::writeJpgFile("brightness.jpg", brightness);
-  ///////////////////////
-
-
-  ///////////////////////
-  // test contrast
-  // adjustment
-  ///////////////////////
-  qivon::Image<unsigned char> contrast;
-  qivon::contrast_adjustment(img, contrast, 110);
-
-  rst = qivon::writeJpgFile("contrast.jpg", contrast);
-  ///////////////////////
-
-  
-  ///////////////////////
-  // test convert RGB
-  // to BGR
-  ///////////////////////
-  qivon::Image<unsigned char> bgr_img;
-  qivon::rgb_to_bgr(img, bgr_img);
-
-  rst = qivon::writePngFile("bgr.png", bgr_img);
-
-  if (rst)
-    std::cout << "Image exported successfully\n";
-  else
-    std::cout << "Problem encountered when export image\n";
-  ///////////////////////
+  //print the test result
+  std::cout << "Test:\t\t " << g_test_count << std::endl;
+  std::cout << "Test succeed:\t " << g_test_succeed << std::endl;
+  std::cout << "Test failed:\t " << g_test_failed << std::endl;
 
   exit(0);
 }

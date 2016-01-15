@@ -2,6 +2,7 @@
 #define TEST_IO_H
 
 #include <string>
+#include <image.h>
 
 bool test_read_png(const std::string &_filename);
 
