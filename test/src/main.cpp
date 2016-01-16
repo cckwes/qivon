@@ -21,6 +21,13 @@ void update_test_counter(bool succeed) {
     ++g_test_failed;
 }
 
+void print_test_result(const std::string& _name, bool succeed) {
+  if (succeed)
+    std::cout << _name << "\t\t\t succeed!\n";
+  else
+    std::cout << _name << "\t\t\t failed!\n";
+}
+
 int main(int argc, char *argv[]) {
 
   ///////////////////////
@@ -43,16 +50,24 @@ int main(int argc, char *argv[]) {
   // IO Test
   ////////////////////////////////////
   //test import png image
-  update_test_counter(test_read_png("wallpaper.png"));
+  rst = test_read_png("wallpaper.png");
+  update_test_counter(rst);
+  print_test_result("test_read_png", rst);
 
   //test export png image
-  update_test_counter(test_write_png("result.png", img));
+  rst = test_write_png("result.png", img);
+  update_test_counter(rst);
+  print_test_result("test_write_png", rst);
 
   //test import jpg image
-  update_test_counter(test_read_jpg("wallpaper.jpg"));
+  rst = test_read_jpg("wallpaper.jpg");
+  update_test_counter(rst);
+  print_test_result("test_read_jpg", rst);
 
   //test export jpg image
-  update_test_counter(test_write_jpg("result.jpg", img, 85));
+  rst = test_write_jpg("result.jpg", img, 85);
+  update_test_counter(rst);
+  print_test_result("test_write_jpg", rst);
   ////////////////////////////////////
 
 
@@ -60,18 +75,28 @@ int main(int argc, char *argv[]) {
   //Geometry Test
   ////////////////////////////////////
   //test resize image
-  update_test_counter(test_resize_image(img, 400, 300));
+  rst = test_resize_image(img, 400, 300);
+  update_test_counter(rst);
+  print_test_result("test_resize_image", rst);
 
   //test crop image
-  update_test_counter(test_crop_image(img, 192, 108, 1536, 864));
+  rst = test_crop_image(img, 192, 108, 1536, 864);
+  update_test_counter(rst);
+  print_test_result("test_crop_image", rst);
   ////////////////////////////////////
 
 
   ////////////////////////////////////
   //Filter Test
   ////////////////////////////////////
+  //convert image to grayscale for mean testing
+  qivon::Image<unsigned char> gray;
+  qivon::toGrayscale(img, gray);
+
   //test mean filter 3x3
-  update_test_counter(test_mean_filter_3x3(img, run_time));
+  rst = test_mean_filter_3x3(gray, run_time);
+  update_test_counter(rst);
+  print_test_result("test_mean_filter_3x3", rst);
   ////////////////////////////////////
 
 
@@ -80,39 +105,57 @@ int main(int argc, char *argv[]) {
   // Color Test
   ////////////////////////////////////
   //test convert to grayscale
-  update_test_counter(test_to_grayscale(img, run_time));
+  rst = test_to_grayscale(img, run_time);
+  update_test_counter(rst);
+  print_test_result("test_to_grayscale", rst);
 
   //test convert from rgb to bgr
-  update_test_counter(test_rgb_to_bgr(img, run_time));
+  rst = test_rgb_to_bgr(img, run_time);
+  update_test_counter(rst);
+  print_test_result("test_rgb_to_bgr", rst);
 
   qivon::Image<unsigned char> bgr;
   qivon::rgb_to_bgr(img, bgr);
 
   //test convert bgr to rgb
-  update_test_counter(test_bgr_to_rgb(bgr, run_time));
+  rst = test_bgr_to_rgb(bgr, run_time);
+  update_test_counter(rst);
+  print_test_result("test_bgr_to_rgb", rst);
 
   //test gamma correction
-  update_test_counter(test_gamma_correction(img, 1.5, run_time));
+  rst = test_gamma_correction(img, 1.5, run_time);
+  update_test_counter(rst);
+  print_test_result("test_gamma_correction", rst);
 
   //test brightness adjustment
-  update_test_counter(test_brightness_adjustment(img, 50, run_time));
+  rst = test_brightness_adjustment(img, 50, run_time);
+  update_test_counter(rst);
+  print_test_result("test_brightness_adjustment", rst);
 
   //test contrast adjustment
-  update_test_counter(test_contrast_adjustment(img, 110, run_time));
+  rst = test_contrast_adjustment(img, 110, run_time);
+  update_test_counter(rst);
+  print_test_result("test_contrast_adjustment", rst);
 
   //test white balance adjustment
-  update_test_counter(test_white_balance_adjustment(img, 15000, run_time));
+  rst = test_white_balance_adjustment(img, 15000, run_time);
+  update_test_counter(rst);
+  print_test_result("test_white_balance_adjustment", rst);
 
   //test hue adjustment
-  update_test_counter(test_hue_adjustment(img, 50, run_time));
+  rst = test_hue_adjustment(img, 50, run_time);
+  update_test_counter(rst);
+  print_test_result("test_hue_adjustment", rst);
 
   //test saturation adjustment
-  update_test_counter(test_saturation_adjustment(img, 50, run_time));
+  rst = test_saturation_adjustment(img, 50, run_time);
+  update_test_counter(rst);
+  print_test_result("test_saturation_adjustment", rst);
   ////////////////////////////////////
 
 
   //print the test result
-  std::cout << "Test:\t\t " << g_test_count << std::endl;
+  std::cout << "Test:\t\t\t " << g_test_count << std::endl;
   std::cout << "Test succeed:\t " << g_test_succeed << std::endl;
   std::cout << "Test failed:\t " << g_test_failed << std::endl;
 
