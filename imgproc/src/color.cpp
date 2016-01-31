@@ -495,6 +495,94 @@ void hsl_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
   _dst = Image<unsigned char>(width, height, 3, Type_RGB, result);
 }
 
+void rgb_to_yuv(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+  //check image empty
+  if (_src.isEmpty()) {
+    std::cerr << "empty image in " << __FUNCTION__ << std::endl;
+    return;
+  }
+
+  //check image type and channels
+  if (_src.color() != Type_RGB || _src.channels() != 3) {
+    std::cerr << "input color type not rgb in " << __FUNCTION__ << std::endl;
+    return;
+  }
+
+  size_t width = _src.width();
+  size_t height = _src.height();
+  size_t img_size = width * height;
+  unsigned char *source_data = _src.data();
+  unsigned char *result = (unsigned char *) malloc(img_size * 3);
+
+  for (size_t i = 0; i < height; ++i) {
+    for (size_t j = 0; j < width; ++j) {
+      size_t data_loc = i * width + j;
+      unsigned char r = source_data[data_loc];
+      data_loc += img_size;
+      unsigned char g = source_data[data_loc];
+      data_loc += img_size;
+      unsigned char b = source_data[data_loc];
+
+      unsigned char y = 0.299f * r + 0.587f * g + 0.114f * b;
+      unsigned char u = -0.14713f * r + -0.28886 * g + 0.436f * b;
+      unsigned char v = 0.615f * r + -0.51499f * g + -0.10001f * b;
+
+      data_loc = i * width + j;
+      result[data_loc] = y;
+      data_loc += img_size;
+      result[data_loc] = u;
+      data_loc += img_size;
+      result[data_loc] = v;
+    }
+  }
+
+  _dst = Image<unsigned char>(width, height, 3, Type_YUV444, result);
+}
+
+void yuv_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+  //check image empty
+  if (_src.isEmpty()) {
+    std::cerr << "empty image in " << __FUNCTION__ << std::endl;
+    return;
+  }
+
+  //check image channel and color type
+  if (_src.color() != Type_YUV444 || _src.channels() != 3) {
+    std::cerr << "input color type not hsv in " << __FUNCTION__ << std::endl;
+    return;
+  }
+
+  size_t width = _src.width();
+  size_t height = _src.height();
+  size_t img_size = width * height;
+  unsigned char *source_data = _src.data();
+  unsigned char *result = (unsigned char *) malloc(img_size * 3);
+
+  for (size_t i = 0; i < height; ++i) {
+    for (size_t j = 0; j < width; ++j) {
+      size_t data_loc = i * width + j;
+      unsigned char y = source_data[data_loc];
+      data_loc += img_size;
+      unsigned char u = source_data[data_loc];
+      data_loc += img_size;
+      unsigned char v = source_data[data_loc];
+
+      unsigned char r = y + 1.13983f * v;
+      unsigned char g = y + -0.39465f * u + -0.5806f * v;
+      unsigned char b = y + 2.03211f * u;
+
+      data_loc = i * width + j;
+      result[data_loc] = r;
+      data_loc += img_size;
+      result[data_loc] = g;
+      data_loc += img_size;
+      result[data_loc] = b;
+    }
+  }
+
+  _dst = Image<unsigned char>(width, height, 3, Type_RGB, result);
+}
+
 void build_gamma_correction_LUT(unsigned char *table, float _gamma_correction) {
   for (size_t i = 0; i < 256; ++i) {
     table[i] = (unsigned char) (255.0f * std::pow((float)i / 255.0f, _gamma_correction));
