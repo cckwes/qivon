@@ -65,7 +65,7 @@ void rgb2Grayscale(unsigned char* src,
   free(b_muliply);
 }
 
-void toGrayscale(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+void toGrayscale(u8_image &_src, u8_image &_dst) {
   //can only handle RGB type
   if (_src.color() != Type_RGB
       && _src.color() != Type_BGR
@@ -91,10 +91,10 @@ void toGrayscale(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
   else
     rgb2Grayscale(_src.data(), gray, _src.width(), _src.height(), false);
 
-  _dst = Image<unsigned char>(_src.width(), _src.height(), 1, Type_Grayscale, gray);
+  _dst = u8_image(_src.width(), _src.height(), 1, Type_Grayscale, gray);
 }
 
-void rgb_to_bgr(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+void rgb_to_bgr(u8_image &_src, u8_image &_dst) {
   //input can be only type rgb
   if (_src.color() != Type_RGB) {
     std::cerr << "Can not convert image type other than RGB in "
@@ -122,10 +122,10 @@ void rgb_to_bgr(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
     bgr[2 * image_size + i] = original[i];
   }
 
-  _dst = Image<unsigned char>(_src.width(), _src.height(), 3, Type_BGR, bgr);
+  _dst = u8_image(_src.width(), _src.height(), 3, Type_BGR, bgr);
 }
 
-void bgr_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+void bgr_to_rgb(u8_image &_src, u8_image &_dst) {
   //input can be only type bgr
   if (_src.color() != Type_BGR) {
     std::cerr << "Can not convert image type other than BGR in "
@@ -153,10 +153,10 @@ void bgr_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
     rgb[2 * image_size + i] = original[i];
   }
 
-  _dst = Image<unsigned char>(_src.width(), _src.height(), 3, Type_RGB, rgb);
+  _dst = u8_image(_src.width(), _src.height(), 3, Type_RGB, rgb);
 }
 
-void rgb_to_hsv(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+void rgb_to_hsv(u8_image &_src, u8_image &_dst) {
   //check image empty
   if (_src.isEmpty()) {
     std::cerr << "empty image in " << __FUNCTION__ << std::endl;
@@ -220,10 +220,10 @@ void rgb_to_hsv(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
     }
   }
 
-  _dst = qivon::Image<unsigned char>(width, height, 3, qivon::Type_HSV, result);
+  _dst = qivon::u8_image(width, height, 3, qivon::Type_HSV, result);
 }
 
-void hsv_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+void hsv_to_rgb(u8_image &_src, u8_image &_dst) {
   //check input image empty
   if (_src.isEmpty()) {
     std::cerr << "empty image in " << __FUNCTION__ << std::endl;
@@ -304,10 +304,10 @@ void hsv_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
     }
   }
 
-  _dst = Image<unsigned char>(width, height, 3, Type_RGB, result);
+  _dst = u8_image(width, height, 3, Type_RGB, result);
 }
 
-void rgb_to_hsl(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+void rgb_to_hsl(u8_image &_src, u8_image &_dst) {
   //check image empty
   if (_src.isEmpty()) {
     std::cerr << "empty image in " << __FUNCTION__ << std::endl;
@@ -372,10 +372,10 @@ void rgb_to_hsl(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
     }
   }
 
-  _dst = Image<unsigned char>(width, height, 3, Type_HSL, result);
+  _dst = u8_image(width, height, 3, Type_HSL, result);
 }
 
-void hsl_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+void hsl_to_rgb(u8_image &_src, u8_image &_dst) {
   //check image empty
   if (_src.isEmpty()) {
     std::cerr << "empty image in " << __FUNCTION__ << std::endl;
@@ -461,10 +461,10 @@ void hsl_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
     }
   }
 
-  _dst = Image<unsigned char>(width, height, 3, Type_RGB, result);
+  _dst = u8_image(width, height, 3, Type_RGB, result);
 }
 
-void rgb_to_yuv(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+void rgb_to_yuv(u8_image &_src, u8_image &_dst) {
   //check image empty
   if (_src.isEmpty()) {
     std::cerr << "empty image in " << __FUNCTION__ << std::endl;
@@ -505,10 +505,10 @@ void rgb_to_yuv(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
     }
   }
 
-  _dst = Image<unsigned char>(width, height, 3, Type_YUV444, result);
+  _dst = u8_image(width, height, 3, Type_YUV444, result);
 }
 
-void yuv_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
+void yuv_to_rgb(u8_image &_src, u8_image &_dst) {
   //check image empty
   if (_src.isEmpty()) {
     std::cerr << "empty image in " << __FUNCTION__ << std::endl;
@@ -549,7 +549,7 @@ void yuv_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
     }
   }
 
-  _dst = Image<unsigned char>(width, height, 3, Type_RGB, result);
+  _dst = u8_image(width, height, 3, Type_RGB, result);
 }
 
 void build_gamma_correction_LUT(unsigned char *table, float _gamma_correction) {
@@ -558,7 +558,7 @@ void build_gamma_correction_LUT(unsigned char *table, float _gamma_correction) {
   }
 }
 
-void gamma_correction(Image<unsigned char> &_src, Image<unsigned char> &_dst, float _gamma) {
+void gamma_correction(u8_image &_src, u8_image &_dst, float _gamma) {
   if (_src.isEmpty()) {
     std::cerr << "source image empty\n";
     return;
@@ -575,10 +575,10 @@ void gamma_correction(Image<unsigned char> &_src, Image<unsigned char> &_dst, fl
     result[i] = (unsigned char) (255.0f * std::pow(_src.data()[i] / 255.0f, gamma_correction));
   }
 
-  _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);
+  _dst = u8_image(_src.width(), _src.height(), _src.channels(), _src.color(), result);
 }
 
-void gamma_correction_LUT(Image<unsigned char> &_src, Image<unsigned char> &_dst, float _gamma) {
+void gamma_correction_LUT(u8_image &_src, u8_image &_dst, float _gamma) {
   if (_src.isEmpty()) {
     std::cerr << "source image empty\n";
     return;
@@ -598,11 +598,11 @@ void gamma_correction_LUT(Image<unsigned char> &_src, Image<unsigned char> &_dst
     result[i] = table[_src.data()[i]];
   }
 
-  _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);
+  _dst = u8_image(_src.width(), _src.height(), _src.channels(), _src.color(), result);
 }
 
-void increase_brightness(Image<unsigned char> &_src,
-                         Image<unsigned char> &_dst,
+void increase_brightness(u8_image &_src,
+                         u8_image &_dst,
                          unsigned char _value) {
   const size_t image_size = _src.width() * _src.height() * _src.channels();
 
@@ -626,11 +626,11 @@ void increase_brightness(Image<unsigned char> &_src,
     result[i] = _src.data()[i] + _value;
   }
 
-  _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);
+  _dst = u8_image(_src.width(), _src.height(), _src.channels(), _src.color(), result);
 }
 
-void decrease_brightness(Image<unsigned char> &_src,
-                         Image<unsigned char> &_dst,
+void decrease_brightness(u8_image &_src,
+                         u8_image &_dst,
                          unsigned char _value) {
   const size_t image_size = _src.width() * _src.height() * _src.channels();
 
@@ -654,21 +654,21 @@ void decrease_brightness(Image<unsigned char> &_src,
     result[i] = _src.data()[i] - _value;
   }
 
-  _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);
+  _dst = u8_image(_src.width(), _src.height(), _src.channels(), _src.color(), result);
 }
 
-void  brightness_adjustment(Image<unsigned char> &_src,
-                           Image<unsigned char> &_dst,
+void  brightness_adjustment(u8_image &_src,
+                           u8_image &_dst,
                            int _adjustment) {
   if (_src.isEmpty()) {
     std::cerr << "source image empty\n";
-    _dst = Image<unsigned char>();
+    _dst = u8_image();
     return;
   }
 
   if (_adjustment > 128 || _adjustment < -128) {
     std::cerr << "invalid brightness adjustment value\n";
-    _dst = Image<unsigned char>();
+    _dst = u8_image();
     return;
   }
 
@@ -677,7 +677,7 @@ void  brightness_adjustment(Image<unsigned char> &_src,
     return;
   }
 
-  Image<unsigned char> yuv_img;
+  u8_image yuv_img;
   rgb_to_yuv(_src, yuv_img);
 
   size_t width = _src.width();
@@ -686,18 +686,18 @@ void  brightness_adjustment(Image<unsigned char> &_src,
   unsigned char *source_data = yuv_img.data();
 }
 
-void contrast_adjustment(Image<unsigned char> &_src,
-                         Image<unsigned char> &_dst,
+void contrast_adjustment(u8_image &_src,
+                         u8_image &_dst,
                          int _adjustment) {
   if (_src.isEmpty()) {
     std::cerr << "source image empty\n";
-    _dst = Image<unsigned char>();
+    _dst = u8_image();
     return;
   }
 
   if (_adjustment > 255 || _adjustment < -255) {
     std::cerr << "invalid contrast adjustment value\n";
-    _dst = Image<unsigned char>();
+    _dst = u8_image();
     return;
   }
 
@@ -719,11 +719,11 @@ void contrast_adjustment(Image<unsigned char> &_src,
     result[j] = lut[source[j]];
   }
 
-  _dst = Image<unsigned char>(_src.width(), _src.height(), _src.channels(), _src.color(), result);
+  _dst = u8_image(_src.width(), _src.height(), _src.channels(), _src.color(), result);
 }
 
-bool white_balance_adjustment(Image<unsigned char> &_src,
-                              Image<unsigned char> &_dst,
+bool white_balance_adjustment(u8_image &_src,
+                              u8_image &_dst,
                               int temperature) {
   //check temperature out of range
   if (temperature < 1000 || temperature > 20000) {
@@ -821,12 +821,12 @@ bool white_balance_adjustment(Image<unsigned char> &_src,
     }
   }
 
-  _dst = qivon::Image<unsigned char>(width, height, _src.channels(), _src.color(), result);
+  _dst = qivon::u8_image(width, height, _src.channels(), _src.color(), result);
 
   return true;
 }
 
-bool hue_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int _value) {
+bool hue_adjustment(u8_image &_src, u8_image &_dst, int _value) {
   //check source image empty
   if (_src.isEmpty()) {
     std::cerr << "source image empty in " << __FUNCTION__ << std::endl;
@@ -846,7 +846,7 @@ bool hue_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int 
     return false;
   }
 
-  Image<unsigned char> hsv_img;
+  u8_image hsv_img;
   if (_src.color() == qivon::Type_HSV)
     hsv_img = _src;
   else {
@@ -902,16 +902,16 @@ bool hue_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int 
   }*/
 
   if (_src.color() == Type_HSV)
-    _dst = Image<unsigned char>(width, height, 3, Type_HSV, result);
+    _dst = u8_image(width, height, 3, Type_HSV, result);
   else {
-    Image<unsigned char> hsv_result = Image<unsigned char>(width, height, 3, Type_HSV, result);
+    u8_image hsv_result = u8_image(width, height, 3, Type_HSV, result);
     hsv_to_rgb(hsv_result, _dst);
   }
 
   return true;
 }
 
-bool saturation_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int _value) {
+bool saturation_adjustment(u8_image &_src, u8_image &_dst, int _value) {
   //check image empty
   if (_src.isEmpty()) {
     std::cerr << "source image empty in " << __FUNCTION__ << std::endl;
@@ -931,7 +931,7 @@ bool saturation_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_ds
     return false;
   }
 
-  Image<unsigned char> hsv_img;
+  u8_image hsv_img;
   if (_src.color() == Type_HSV)
     hsv_img = _src;
   else
@@ -969,9 +969,9 @@ bool saturation_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_ds
   }
 
   if (_src.color() == Type_HSV)
-    _dst = qivon::Image<unsigned char>(width, height, 3, Type_HSV, result);
+    _dst = qivon::u8_image(width, height, 3, Type_HSV, result);
   else {
-    Image<unsigned char> hsv_result = Image<unsigned char>(width, height, 3, Type_HSV, result);
+    u8_image hsv_result = u8_image(width, height, 3, Type_HSV, result);
     hsv_to_rgb(hsv_result, _dst);
   }
 
