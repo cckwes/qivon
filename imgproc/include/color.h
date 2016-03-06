@@ -7,47 +7,49 @@
 
 namespace qivon {
 
-QIVON_EXPORT void toGrayscale(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+using u8_image = Image<unsigned char>;
 
-QIVON_EXPORT void rgb_to_bgr(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+QIVON_EXPORT void toGrayscale(u8_image &_src, u8_image &_dst);
 
-QIVON_EXPORT void bgr_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+QIVON_EXPORT void rgb_to_bgr(u8_image &_src, u8_image &_dst);
 
-QIVON_EXPORT void rgb_to_hsv(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+QIVON_EXPORT void bgr_to_rgb(u8_image &_src, u8_image &_dst);
 
-QIVON_EXPORT void rgb_to_hsl(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+QIVON_EXPORT void rgb_to_hsv(u8_image &_src, u8_image &_dst);
 
-QIVON_EXPORT void hsl_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+QIVON_EXPORT void rgb_to_hsl(u8_image &_src, u8_image &_dst);
 
-QIVON_EXPORT void hsv_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+QIVON_EXPORT void hsl_to_rgb(u8_image &_src, u8_image &_dst);
 
-QIVON_EXPORT void rgb_to_yuv(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+QIVON_EXPORT void hsv_to_rgb(u8_image &_src, u8_image &_dst);
 
-QIVON_EXPORT void yuv_to_rgb(Image<unsigned char> &_src, Image<unsigned char> &_dst);
+QIVON_EXPORT void rgb_to_yuv(u8_image &_src, u8_image &_dst);
 
-QIVON_EXPORT void gamma_correction(Image<unsigned char> &_src,
-                                   Image<unsigned char> &_dst,
+QIVON_EXPORT void yuv_to_rgb(u8_image &_src, u8_image &_dst);
+
+QIVON_EXPORT void gamma_correction(u8_image &_src,
+                                   u8_image &_dst,
                                    float _gamma);
 
-QIVON_EXPORT void gamma_correction_LUT(Image<unsigned char> &_src,
-                                       Image<unsigned char> &_dst,
+QIVON_EXPORT void gamma_correction_LUT(u8_image &_src,
+                                       u8_image &_dst,
                                        float _gamma);
 
-QIVON_EXPORT void brightness_adjustment(Image<unsigned char> &_src,
-                                        Image<unsigned char> &_dst,
+QIVON_EXPORT void brightness_adjustment(u8_image &_src,
+                                        u8_image &_dst,
                                         int _adjustment);
 
-QIVON_EXPORT void contrast_adjustment(Image<unsigned char> &_src,
-                                      Image<unsigned char> &_dst,
+QIVON_EXPORT void contrast_adjustment(u8_image &_src,
+                                      u8_image &_dst,
                                       int _adjustment);
 
-QIVON_EXPORT bool white_balance_adjustment(Image<unsigned char> &_src,
-                                           Image<unsigned char> &_dst,
+QIVON_EXPORT bool white_balance_adjustment(u8_image &_src,
+                                           u8_image &_dst,
                                            int temperature);
 
-QIVON_EXPORT bool hue_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int _value);
+QIVON_EXPORT bool hue_adjustment(u8_image &_src, u8_image &_dst, int _value);
 
-QIVON_EXPORT bool saturation_adjustment(Image<unsigned char> &_src, Image<unsigned char> &_dst, int _value);
+QIVON_EXPORT bool saturation_adjustment(u8_image &_src, u8_image &_dst, int _value);
 }
 
 #endif  //QIVON_COLOR_H

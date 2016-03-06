@@ -8,27 +8,36 @@
 
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 #include "color.h"
 
 namespace qivon {
 
-void rgb_to_grayscale_8u(unsigned char* _src, unsigned char* _dst, size_t _width, size_t _height) {
-  unsigned char *r_muliply = (unsigned char *) malloc(_width * _height);
-  unsigned char *g_muliply = (unsigned char *) malloc(_width * _height);
-  unsigned char *b_muliply = (unsigned char *) malloc(_width * _height);
+void rgb2Grayscale(unsigned char* src,
+                   unsigned char* dst,
+                   size_t width,
+                   size_t height,
+                   bool rgb = true) {
+  unsigned char* const r_muliply = (unsigned char *) malloc(width * height);
+  unsigned char* const g_muliply = (unsigned char *) malloc(width * height);
+  unsigned char* const b_muliply = (unsigned char *) malloc(width * height);
 
-  const size_t img_size = _width * _height;
+  const size_t kImgSize = width * height;
 
-  for (size_t i = 0; i < img_size; ++i) {
-    r_muliply[i] = (unsigned char) ((float) _src[i] * 0.2126f);
-    g_muliply[i] = (unsigned char) ((float) _src[i + img_size] * 0.7152f);
-    b_muliply[i] = (unsigned char) ((float) _src[i + 2 * img_size] * 0.0722f);
+  const float r_factor = 0.2126f;
+  const float g_factor = 0.7152f;
+  const float b_factor = 0.0722f;
+
+  for (size_t i = 0; i < kImgSize; ++i) {
+    r_muliply[i] = (unsigned char) (r_factor * (rgb ? src[i] : src[i + kImgSize + kImgSize]));
+    g_muliply[i] = (unsigned char) (g_factor * src[i + kImgSize]);
+    b_muliply[i] = (unsigned char) (b_factor * (rgb ? src[i + kImgSize + kImgSize] : src[i]));
   }
 
-  size_t length = img_size;
-
   int start_of_remaining = 0;
-  for (size_t i = 0; i < (length - 16); i += 16) {
+  const size_t vector_length = 16;
+
+  for (size_t i = 0; i <= (kImgSize - vector_length); i += vector_length) {
     __m128i r_vec = _mm_loadu_si128((__m128i*) &r_muliply[i]);
     __m128i g_vec = _mm_loadu_si128((__m128i*) &g_muliply[i]);
     __m128i b_vec = _mm_loadu_si128((__m128i*) &b_muliply[i]);
@@ -36,64 +45,24 @@ void rgb_to_grayscale_8u(unsigned char* _src, unsigned char* _dst, size_t _width
     __m128i tmp_vec = _mm_add_epi8(r_vec, g_vec);
     __m128i result_vec = _mm_add_epi8(tmp_vec, b_vec);
 
-    unsigned char *result = (unsigned char *) &result_vec;
+    unsigned char* const result = (unsigned char *) &result_vec;
 
-    for (int j = 0; j < 16; ++j) {
-      _dst[i + j] = result[j];
-    }
+    std::copy(result, result + vector_length, &dst[i]);
 
-    start_of_remaining = i + 16;
+    start_of_remaining = i + vector_length;
   }
 
-  size_t remaining = length % 16;
+  const size_t remaining = kImgSize % vector_length;
 
   if (remaining != 0) {
-    for (size_t i = start_of_remaining; i < length; ++i) {
-      _dst[i] = r_muliply[i] + g_muliply[i] + b_muliply[i];
+    for (size_t i = start_of_remaining; i < kImgSize; ++i) {
+      dst[i] = r_muliply[i] + g_muliply[i] + b_muliply[i];
     }
   }
-}
 
-void bgr_to_grayscale_8u(unsigned char* _src, unsigned char* _dst, size_t _width, size_t _height) {
-  unsigned char *r_muliply = (unsigned char *) malloc(_width * _height);
-  unsigned char *g_muliply = (unsigned char *) malloc(_width * _height);
-  unsigned char *b_muliply = (unsigned char *) malloc(_width * _height);
-
-  const size_t img_size = _width * _height;
-
-  for (size_t i = 0; i < img_size; ++i) {
-    b_muliply[i] = (unsigned char) ((float) _src[i] * 0.0722f);
-    g_muliply[i] = (unsigned char) ((float) _src[i + img_size] * 0.7152f);
-    r_muliply[i] = (unsigned char) ((float) _src[i + 2 * img_size] * 0.2126f);
-  }
-
-  size_t length = img_size;
-
-  int start_of_remaining = 0;
-  for (size_t i = 0; i < (length - 16); i += 16) {
-    __m128i r_vec = _mm_loadu_si128((__m128i*) &r_muliply[i]);
-    __m128i g_vec = _mm_loadu_si128((__m128i*) &g_muliply[i]);
-    __m128i b_vec = _mm_loadu_si128((__m128i*) &b_muliply[i]);
-
-    __m128i tmp_vec = _mm_add_epi8(r_vec, g_vec);
-    __m128i result_vec = _mm_add_epi8(tmp_vec, b_vec);
-
-    unsigned char *result = (unsigned char *) &result_vec;
-
-    for (int j = 0; j < 16; ++j) {
-      _dst[i + j] = result[j];
-    }
-
-    start_of_remaining = i + 16;
-  }
-
-  size_t remaining = length % 16;
-
-  if (remaining != 0) {
-    for (size_t i = start_of_remaining; i < length; ++i) {
-      _dst[i] = r_muliply[i] + g_muliply[i] + b_muliply[i];
-    }
-  }
+  free(r_muliply);
+  free(g_muliply);
+  free(b_muliply);
 }
 
 void toGrayscale(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
@@ -101,7 +70,7 @@ void toGrayscale(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
   if (_src.color() != Type_RGB
       && _src.color() != Type_BGR
       && _src.color() != Type_RGBA) {
-    std::cerr << "Can not convert image type other than RGBA, RGB and BGRin "
+    std::cerr << "Can not convert image type other than RGBA, RGB and BGR in "
         << __FUNCTION__ << " at " << __LINE__ << "\n";
     return;
   }
@@ -118,9 +87,9 @@ void toGrayscale(Image<unsigned char> &_src, Image<unsigned char> &_dst) {
   unsigned char *gray = (unsigned char*) malloc(_src.width() * _src.height() * sizeof(unsigned char));
 
   if (_src.color() == Type_RGB || _src.color() == Type_RGBA)
-    rgb_to_grayscale_8u(_src.data(), gray, _src.width(), _src.height());
+    rgb2Grayscale(_src.data(), gray, _src.width(), _src.height());
   else
-    bgr_to_grayscale_8u(_src.data(), gray, _src.width(), _src.height());
+    rgb2Grayscale(_src.data(), gray, _src.width(), _src.height(), false);
 
   _dst = Image<unsigned char>(_src.width(), _src.height(), 1, Type_Grayscale, gray);
 }
@@ -697,17 +666,24 @@ void  brightness_adjustment(Image<unsigned char> &_src,
     return;
   }
 
-  if (_adjustment > 255 || _adjustment < -255) {
+  if (_adjustment > 128 || _adjustment < -128) {
     std::cerr << "invalid brightness adjustment value\n";
     _dst = Image<unsigned char>();
     return;
   }
 
-  if (_adjustment > 0) {
-    increase_brightness(_src, _dst, (unsigned char) _adjustment);
-  } else {
-    decrease_brightness(_src, _dst, (unsigned char) _adjustment);
+  if (_src.color() != Type_RGB && _src.channels() != 3) {
+    std::cerr << "image type must be rgb in " << __FUNCTION__ << "\n";
+    return;
   }
+
+  Image<unsigned char> yuv_img;
+  rgb_to_yuv(_src, yuv_img);
+
+  size_t width = _src.width();
+  size_t height = _src.height();
+  size_t img_size = width * height;
+  unsigned char *source_data = yuv_img.data();
 }
 
 void contrast_adjustment(Image<unsigned char> &_src,

@@ -50,6 +50,7 @@ int main(int argc, char *argv[]) {
   // IO Test
   ////////////////////////////////////
   //test import png image
+  /*
   rst = test_read_png("wallpaper.png");
   update_test_counter(rst);
   print_test_result("test_read_png", rst);
@@ -68,6 +69,7 @@ int main(int argc, char *argv[]) {
   rst = test_write_jpg("result.jpg", img, 85);
   update_test_counter(rst);
   print_test_result("test_write_jpg", rst);
+   */
   ////////////////////////////////////
 
 
@@ -75,6 +77,7 @@ int main(int argc, char *argv[]) {
   //Geometry Test
   ////////////////////////////////////
   //test resize image
+  /*
   rst = test_resize_image(img, 400, 300);
   update_test_counter(rst);
   print_test_result("test_resize_image", rst);
@@ -97,6 +100,7 @@ int main(int argc, char *argv[]) {
   rst = test_mean_filter_3x3(gray, run_time);
   update_test_counter(rst);
   print_test_result("test_mean_filter_3x3", rst);
+   */
   ////////////////////////////////////
 
 
@@ -110,6 +114,7 @@ int main(int argc, char *argv[]) {
   print_test_result("test_to_grayscale", rst);
 
   //test convert from rgb to bgr
+  /*
   rst = test_rgb_to_bgr(img, run_time);
   update_test_counter(rst);
   print_test_result("test_rgb_to_bgr", rst);
@@ -151,6 +156,7 @@ int main(int argc, char *argv[]) {
   rst = test_saturation_adjustment(img, 50, run_time);
   update_test_counter(rst);
   print_test_result("test_saturation_adjustment", rst);
+   */
   ////////////////////////////////////
 
 
