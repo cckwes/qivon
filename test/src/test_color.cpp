@@ -35,7 +35,7 @@ bool test_rgb_to_bgr(qivon::Image<unsigned char> &_src, size_t _run_time) {
   set_start_now();
 
   for (size_t i = 0; i < _run_time; ++i)
-    qivon::rgb_to_bgr(_src, bgr);
+    qivon::rgbSwap(_src, bgr);
 
   std::cout << __FUNCTION__ << " time: " << get_elapsed_time() / _run_time << " ms\n";
 
@@ -54,7 +54,7 @@ bool test_bgr_to_rgb(qivon::Image<unsigned char> &_src, size_t _run_time) {
   set_start_now();
 
   for (size_t i = 0; i < _run_time; ++i)
-    qivon::bgr_to_rgb(_src, rgb);
+    qivon::rgbSwap(_src, rgb);
 
   std::cout << __FUNCTION__ << " time " << get_elapsed_time() / _run_time << " ms\n";
 

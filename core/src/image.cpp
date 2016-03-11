@@ -58,7 +58,8 @@ Image<T>::~Image() {
 
 template<class T>
 bool Image<T>::isEmpty() {
-  return m_width == 0 || m_height == 0 || m_data.get() == nullptr;
+  return m_width == 0 || m_height == 0
+      || m_data.get() == nullptr || m_channels == 0;
 }
 
 template <class T>

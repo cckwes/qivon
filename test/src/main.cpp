@@ -114,19 +114,19 @@ int main(int argc, char *argv[]) {
   print_test_result("test_to_grayscale", rst);
 
   //test convert from rgb to bgr
-  /*
   rst = test_rgb_to_bgr(img, run_time);
   update_test_counter(rst);
   print_test_result("test_rgb_to_bgr", rst);
 
   qivon::Image<unsigned char> bgr;
-  qivon::rgb_to_bgr(img, bgr);
+  qivon::rgbSwap(img, bgr);
 
   //test convert bgr to rgb
   rst = test_bgr_to_rgb(bgr, run_time);
   update_test_counter(rst);
   print_test_result("test_bgr_to_rgb", rst);
 
+  /*
   //test gamma correction
   rst = test_gamma_correction(img, 1.5, run_time);
   update_test_counter(rst);

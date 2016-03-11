@@ -65,128 +65,92 @@ void rgb2Grayscale(unsigned char* src,
   free(b_muliply);
 }
 
-void toGrayscale(u8_image &_src, u8_image &_dst) {
+void toGrayscale(u8_image &src, u8_image &dst) {
   //can only handle RGB type
-  if (_src.color() != Type_RGB
-      && _src.color() != Type_BGR
-      && _src.color() != Type_RGBA) {
+  if (src.color() != Type_RGB
+      && src.color() != Type_BGR
+      && src.color() != Type_RGBA) {
     std::cerr << "Can not convert image type other than RGBA, RGB and BGR in "
         << __FUNCTION__ << " at " << __LINE__ << "\n";
     return;
   }
 
-  if (_src.data() == nullptr
-      || _src.width() == 0
-      || _src.height() == 0
-      || _src.channels() == 0) {
+  if (src.isEmpty()) {
     std::cerr << "source image nullptr or wrong size in "
         << __FUNCTION__ << " at " << __LINE__ << "\n";
     return;
   }
 
-  unsigned char *gray = (unsigned char*) malloc(_src.width() * _src.height() * sizeof(unsigned char));
+  unsigned char* const gray = (unsigned char*) malloc(src.width() * src.height() * sizeof(unsigned char));
 
-  if (_src.color() == Type_RGB || _src.color() == Type_RGBA)
-    rgb2Grayscale(_src.data(), gray, _src.width(), _src.height());
+  if (src.color() == Type_RGB || src.color() == Type_RGBA)
+    rgb2Grayscale(src.data(), gray, src.width(), src.height());
   else
-    rgb2Grayscale(_src.data(), gray, _src.width(), _src.height(), false);
+    rgb2Grayscale(src.data(), gray, src.width(), src.height(), false);
 
-  _dst = u8_image(_src.width(), _src.height(), 1, Type_Grayscale, gray);
+  dst = u8_image(src.width(), src.height(), 1, Type_Grayscale, gray);
 }
 
-void rgb_to_bgr(u8_image &_src, u8_image &_dst) {
-  //input can be only type rgb
-  if (_src.color() != Type_RGB) {
-    std::cerr << "Can not convert image type other than RGB in "
+void rgbSwap(u8_image &src, u8_image &dst) {
+  if (src.color() != Type_RGB && src.color() != Type_BGR) {
+    std::cerr << "Can only swap image type RGB or BGR in "
         << __FUNCTION__ << " at line " << __LINE__ << "\n";
     return;
   }
 
-  if (_src.data() == nullptr
-      || _src.width() == 0
-      || _src.height() == 0
-      || _src.channels() == 0) {
-    std::cerr << "source image nullptr or wrong size in "
+  if (src.isEmpty()) {
+    std::cerr << "Source image empty in "
         << __FUNCTION__ << " at line " << __LINE__ << "\n";
     return;
   }
 
-  size_t image_size = _src.width() * _src.height();
+  const size_t kImgSize = src.width() * src.height();
 
-  unsigned char *bgr = (unsigned char*) malloc(3 * _src.width() * _src.height() * sizeof(unsigned char));
-  unsigned char *original = _src.data();
+  unsigned char* const result = (unsigned char*) malloc(3 * kImgSize * sizeof(unsigned char));
+  const unsigned char* const original = src.data();
 
-  for (size_t i = 0; i < image_size; ++i) {
-    bgr[i] = original[2 * image_size + i];
-    bgr[image_size + i] = original[image_size + i];
-    bgr[2 * image_size + i] = original[i];
-  }
+  //swap the 0th channel
+  std::copy(original, original + kImgSize, result + 2 * kImgSize);
 
-  _dst = u8_image(_src.width(), _src.height(), 3, Type_BGR, bgr);
+  //copy the 1st channel
+  std::copy(original + kImgSize, original + 2 * kImgSize, result + kImgSize);
+
+  //swap the 2nd channel
+  std::copy(original + 2 * kImgSize, original + 3 * kImgSize, result);
+
+  dst = u8_image(src.width(), src.height(), 3,
+                 (src.color() == Type_RGB) ? Type_BGR : Type_RGB, result);
 }
 
-void bgr_to_rgb(u8_image &_src, u8_image &_dst) {
-  //input can be only type bgr
-  if (_src.color() != Type_BGR) {
-    std::cerr << "Can not convert image type other than BGR in "
-        << __FUNCTION__ << " at line " << __LINE__ << "\n";
-    return;
-  }
-
-  if (_src.data() == nullptr
-      || _src.width() == 0
-      || _src.height() == 0
-      || _src.channels() == 0) {
-    std::cerr << "source image nullptr or wrong size in "
-        << __FUNCTION__ << " at line " << __LINE__ << "\n";
-    return;
-  }
-
-  size_t image_size = _src.width() * _src.height();
-
-  unsigned char *rgb = (unsigned char*) malloc(3 * _src.width() * _src.height() * sizeof(unsigned char));
-  unsigned char *original = _src.data();
-
-  for (size_t i = 0; i < image_size; ++i) {
-    rgb[i] = original[2 * image_size + i];
-    rgb[image_size + i] = original[image_size + i];
-    rgb[2 * image_size + i] = original[i];
-  }
-
-  _dst = u8_image(_src.width(), _src.height(), 3, Type_RGB, rgb);
-}
-
-void rgb_to_hsv(u8_image &_src, u8_image &_dst) {
+void rgb_to_hsv(u8_image &src, u8_image &dst) {
   //check image empty
-  if (_src.isEmpty()) {
-    std::cerr << "empty image in " << __FUNCTION__ << std::endl;
+  if (src.isEmpty()) {
+    std::cerr << "Source image empty in " << __FUNCTION__ << std::endl;
     return;
   }
 
   //check input image color type
-  if (_src.color() != Type_RGB || _src.channels() != 3) {
+  if (src.color() != Type_RGB || src.channels() != 3) {
     std::cerr << "input color type not rgb in " << __FUNCTION__ << std::endl;
     return;
   }
 
-  size_t width = _src.width();
-  size_t height = _src.height();
-  size_t img_size = width * height;
-  unsigned char *source_data = _src.data();
+  const size_t& kWidth = src.width();
+  const size_t& kHeight = src.height();
+  const size_t kImgSize = kWidth * kHeight;
+  const unsigned char* const original = src.data();
 
-  unsigned char *result = (unsigned char *) malloc(img_size * 3 * sizeof(unsigned char));
+  unsigned char* const result = (unsigned char*) malloc(kImgSize * 3 * sizeof(unsigned char));
 
-  for (size_t i = 0; i < height; ++i) {
-    for (size_t j = 0; j < width; ++j) {
-      float r, g, b;
-      r = float(source_data[i * width + j]) / 255.0f;
-      g = float(source_data[i * width + j + img_size]) / 255.0f;
-      b = float(source_data[i * width + j + img_size + img_size]) / 255.0f;
+  for (size_t i = 0; i < kHeight; ++i) {
+    for (size_t j = 0; j < kWidth; ++j) {
+      float r = float(original[i * kWidth + j]) / 255.0f;
+      float g = float(original[i * kWidth + j + kImgSize]) / 255.0f;
+      float b = float(original[i * kWidth + j + 2 * kImgSize]) / 255.0f;
 
-      float min, max, delta;
-      min = std::min(r, std::min(g, b));
-      max = std::max(r, std::max(g, b));
-      delta = max - min;
+      float min = std::min(r, std::min(g, b));
+      float max = std::max(r, std::max(g, b));
+      float delta = max - min;
 
       //get the V value
       unsigned char v = (unsigned char) (max * 255.0f);
@@ -207,47 +171,43 @@ void rgb_to_hsv(u8_image &_src, u8_image &_dst) {
       unsigned char h = (unsigned char) f_h / 360.0f * 255.0f;
 
       //get the S value
-      unsigned char s;
-      if (max == 0)
-        s = 0;
-      else
-        s = (unsigned char) ((delta / max) * 255.0f);
+      unsigned char s = (max == 0) ? 0 : (unsigned char) ((delta / max) * 255.0f);
 
       //put HSV value into result buffer
-      result[i * width + j] = h;
-      result[i * width + j + img_size] = s;
-      result[i * width + j + img_size + img_size] = v;
+      result[i * kWidth + j] = h;
+      result[i * kWidth + j + kImgSize] = s;
+      result[i * kWidth + j + 2 * kImgSize] = v;
     }
   }
 
-  _dst = qivon::u8_image(width, height, 3, qivon::Type_HSV, result);
+  dst = qivon::u8_image(kWidth, kHeight, 3, qivon::Type_HSV, result);
 }
 
-void hsv_to_rgb(u8_image &_src, u8_image &_dst) {
+void hsv_to_rgb(u8_image &src, u8_image &dst) {
   //check input image empty
-  if (_src.isEmpty()) {
-    std::cerr << "empty image in " << __FUNCTION__ << std::endl;
+  if (src.isEmpty()) {
+    std::cerr << "Source image empty in " << __FUNCTION__ << std::endl;
     return;
   }
 
   //check input color type and number of channels
-  if (_src.color() != qivon::Type_HSV || _src.channels() != 3) {
+  if (src.color() != qivon::Type_HSV || src.channels() != 3) {
     std::cerr << "input color type not hsv in " << __FUNCTION__ << std::endl;
     return;
   }
 
-  size_t width = _src.width();
-  size_t height = _src.height();
-  size_t img_size = width * height;
-  unsigned char *source_data = _src.data();
+  const size_t& kWidth = src.width();
+  const size_t& kHeight = src.height();
+  const size_t kImgSize = kWidth * kHeight;
+  const unsigned char* const original = src.data();
 
-  unsigned char *result = (unsigned char *) malloc(img_size * 3);
+  unsigned char* const result = (unsigned char*) malloc(kImgSize * 3 * sizeof(unsigned char));
 
-  for (size_t i = 0; i < height; ++i) {
-    for (size_t j = 0; j < width; ++j) {
-      float h = float(source_data[i * width + j]) * 1.4117647f;   //is /255*360
-      float s = float(source_data[i * width + j + img_size]) / 255.0f;
-      float v = float(source_data[i * width + j + img_size + img_size]) / 255.0f;
+  for (size_t i = 0; i < kHeight; ++i) {
+    for (size_t j = 0; j < kWidth; ++j) {
+      float h = float(original[i * kWidth + j]) * 1.4117647f;   //is /255*360
+      float s = float(original[i * kWidth + j + kImgSize]) / 255.0f;
+      float v = float(original[i * kWidth + j + 2 * kImgSize]) / 255.0f;
 
       unsigned char r, g, b;
       if (s == 0) {
@@ -298,13 +258,13 @@ void hsv_to_rgb(u8_image &_src, u8_image &_dst) {
         }
       }
 
-      result[i * width + j] = r;
-      result[i * width + j + img_size] = g;
-      result[i * width + j + img_size + img_size] = b;
+      result[i * kWidth + j] = r;
+      result[i * kWidth + j + kImgSize] = g;
+      result[i * kWidth + j + 2 * kImgSize] = b;
     }
   }
 
-  _dst = u8_image(width, height, 3, Type_RGB, result);
+  dst = u8_image(kWidth, kHeight, 3, Type_RGB, result);
 }
 
 void rgb_to_hsl(u8_image &_src, u8_image &_dst) {

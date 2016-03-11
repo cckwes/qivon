@@ -9,11 +9,9 @@ namespace qivon {
 
 using u8_image = Image<unsigned char>;
 
-QIVON_EXPORT void toGrayscale(u8_image &_src, u8_image &_dst);
+QIVON_EXPORT void toGrayscale(u8_image &src, u8_image &dst);
 
-QIVON_EXPORT void rgb_to_bgr(u8_image &_src, u8_image &_dst);
-
-QIVON_EXPORT void bgr_to_rgb(u8_image &_src, u8_image &_dst);
+QIVON_EXPORT void rgbSwap(u8_image &src, u8_image &dst);
 
 QIVON_EXPORT void rgb_to_hsv(u8_image &_src, u8_image &_dst);
 
