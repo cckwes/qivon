@@ -65,7 +65,7 @@ void rgb2Grayscale(unsigned char* src,
   free(b_muliply);
 }
 
-void toGrayscale(u8_image &src, u8_image &dst) {
+void toGrayscale(u8_image& src, u8_image& dst) {
   //can only handle RGB type
   if (src.color() != Type_RGB
       && src.color() != Type_BGR
@@ -81,7 +81,7 @@ void toGrayscale(u8_image &src, u8_image &dst) {
     return;
   }
 
-  unsigned char* const gray = (unsigned char*) malloc(src.width() * src.height() * sizeof(unsigned char));
+  unsigned char* const gray = (unsigned char*) malloc(src.width() * src.height());
 
   if (src.color() == Type_RGB || src.color() == Type_RGBA)
     rgb2Grayscale(src.data(), gray, src.width(), src.height());
@@ -91,7 +91,7 @@ void toGrayscale(u8_image &src, u8_image &dst) {
   dst = u8_image(src.width(), src.height(), 1, Type_Grayscale, gray);
 }
 
-void rgbSwap(u8_image &src, u8_image &dst) {
+void rgbSwap(u8_image& src, u8_image& dst) {
   if (src.color() != Type_RGB && src.color() != Type_BGR) {
     std::cerr << "Can only swap image type RGB or BGR in "
         << __FUNCTION__ << " at line " << __LINE__ << "\n";
@@ -106,7 +106,7 @@ void rgbSwap(u8_image &src, u8_image &dst) {
 
   const size_t kImgSize = src.width() * src.height();
 
-  unsigned char* const result = (unsigned char*) malloc(3 * kImgSize * sizeof(unsigned char));
+  unsigned char* const result = (unsigned char*) malloc(3 * kImgSize);
   const unsigned char* const original = src.data();
 
   //swap the 0th channel
@@ -122,7 +122,7 @@ void rgbSwap(u8_image &src, u8_image &dst) {
                  (src.color() == Type_RGB) ? Type_BGR : Type_RGB, result);
 }
 
-void rgb_to_hsv(u8_image &src, u8_image &dst) {
+void rgb2Hsv(u8_image& src, u8_image& dst) {
   //check image empty
   if (src.isEmpty()) {
     std::cerr << "Source image empty in " << __FUNCTION__ << std::endl;
@@ -140,7 +140,7 @@ void rgb_to_hsv(u8_image &src, u8_image &dst) {
   const size_t kImgSize = kWidth * kHeight;
   const unsigned char* const original = src.data();
 
-  unsigned char* const result = (unsigned char*) malloc(kImgSize * 3 * sizeof(unsigned char));
+  unsigned char* const result = (unsigned char*) malloc(kImgSize * 3);
 
   for (size_t i = 0; i < kHeight; ++i) {
     for (size_t j = 0; j < kWidth; ++j) {
@@ -183,7 +183,7 @@ void rgb_to_hsv(u8_image &src, u8_image &dst) {
   dst = qivon::u8_image(kWidth, kHeight, 3, qivon::Type_HSV, result);
 }
 
-void hsv_to_rgb(u8_image &src, u8_image &dst) {
+void hsv2Rgb(u8_image& src, u8_image& dst) {
   //check input image empty
   if (src.isEmpty()) {
     std::cerr << "Source image empty in " << __FUNCTION__ << std::endl;
@@ -201,7 +201,7 @@ void hsv_to_rgb(u8_image &src, u8_image &dst) {
   const size_t kImgSize = kWidth * kHeight;
   const unsigned char* const original = src.data();
 
-  unsigned char* const result = (unsigned char*) malloc(kImgSize * 3 * sizeof(unsigned char));
+  unsigned char* const result = (unsigned char*) malloc(kImgSize * 3);
 
   for (size_t i = 0; i < kHeight; ++i) {
     for (size_t j = 0; j < kWidth; ++j) {
@@ -267,46 +267,40 @@ void hsv_to_rgb(u8_image &src, u8_image &dst) {
   dst = u8_image(kWidth, kHeight, 3, Type_RGB, result);
 }
 
-void rgb_to_hsl(u8_image &_src, u8_image &_dst) {
+void rgb2Hsl(u8_image& src, u8_image& dst) {
   //check image empty
-  if (_src.isEmpty()) {
-    std::cerr << "empty image in " << __FUNCTION__ << std::endl;
+  if (src.isEmpty()) {
+    std::cerr << "Source image empty in " << __FUNCTION__ << std::endl;
     return;
   }
 
   //check image type and channels
-  if (_src.color() != Type_RGB || _src.channels() != 3) {
+  if (src.color() != Type_RGB || src.channels() != 3) {
     std::cerr << "input color type not rgb in " << __FUNCTION__ << std::endl;
     return;
   }
 
-  size_t width = _src.width();
-  size_t height = _src.height();
-  size_t img_size = width * height;
-  unsigned char *source_data = _src.data();
-  unsigned char *result = (unsigned char *) malloc(img_size * 3);
+  const size_t& kWidth = src.width();
+  const size_t& kHeight = src.height();
+  const size_t kImgSize = kWidth * kHeight;
+  const unsigned char* const original = src.data();
+  unsigned char* const result = (unsigned char*) malloc(kImgSize * 3);
 
-  for (size_t i = 0; i < height; ++i) {
-    for (size_t j = 0; j < width; ++j) {
-      float r, g, b;
-      r = float(source_data[i * width + j]) / 255.0f;
-      g = float(source_data[i * width + j + img_size]) / 255.0f;
-      b = float(source_data[i * width + j + img_size + img_size]) / 255.0f;
+  for (size_t i = 0; i < kHeight; ++i) {
+    for (size_t j = 0; j < kWidth; ++j) {
+      float r = float(original[i * kWidth + j]) / 255.0f;
+      float g = float(original[i * kWidth + j + kImgSize]) / 255.0f;
+      float b = float(original[i * kWidth + j + 2 * kImgSize]) / 255.0f;
 
-      float min, max, delta;
-      min = std::min(r, std::min(g, b));
-      max = std::max(r, std::max(g, b));
-      delta = max - min;
+      float min = std::min(r, std::min(g, b));
+      float max = std::max(r, std::max(g, b));
+      float delta = max - min;
 
       //get the L value
       unsigned char l = (unsigned char) ((max + min) / 2.0f * 255.0f);
 
       //get the S value
-      unsigned char s;
-      if (delta == 0)
-        s = 0;
-      else
-        s = (unsigned char) (delta / 1.0 - std::fabsf(max + min - 1));
+      unsigned char s = (delta == 0) ? 0 : (unsigned char) (delta / 1.0 - std::fabsf(max + min - 1));
 
       //get the H value
       float f_h;
@@ -323,53 +317,53 @@ void rgb_to_hsl(u8_image &_src, u8_image &_dst) {
       unsigned char h = (unsigned char) f_h / 360.0f * 255.0f;
 
       //put HSL into result buffer
-      size_t data_loc = i * width + j;
+      size_t data_loc = i * kWidth + j;
       result[data_loc] = h;
-      data_loc += img_size;
+      data_loc += kImgSize;
       result[data_loc] = s;
-      data_loc += img_size;
+      data_loc += kImgSize;
       result[data_loc] = l;
     }
   }
 
-  _dst = u8_image(width, height, 3, Type_HSL, result);
+  dst = u8_image(kWidth, kHeight, 3, Type_HSL, result);
 }
 
-void hsl_to_rgb(u8_image &_src, u8_image &_dst) {
+void hsl2Rgb(u8_image& src, u8_image& dst) {
   //check image empty
-  if (_src.isEmpty()) {
-    std::cerr << "empty image in " << __FUNCTION__ << std::endl;
+  if (src.isEmpty()) {
+    std::cerr << "Source image empty in " << __FUNCTION__ << std::endl;
     return;
   }
 
   //check image channel and color type
-  if (_src.color() != Type_HSL || _src.channels() != 3) {
+  if (src.color() != Type_HSL || src.channels() != 3) {
     std::cerr << "input color type not hsv in " << __FUNCTION__ << std::endl;
     return;
   }
 
-  size_t width = _src.width();
-  size_t height = _src.height();
-  size_t img_size = width * height;
-  unsigned char *source_data = _src.data();
+  const size_t& kWidth = src.width();
+  const size_t& kHeight = src.height();
+  const size_t kImgSize = kWidth * kHeight;
+  const unsigned char* const original = src.data();
 
-  unsigned char *result = (unsigned char *) malloc(img_size * 3);
+  unsigned char* const result = (unsigned char *) malloc(kImgSize * 3);
 
-  for (size_t i = 0; i < height; ++i) {
-    for (size_t j = 0; j < width; ++j) {
+  for (size_t i = 0; i < kHeight; ++i) {
+    for (size_t j = 0; j < kWidth; ++j) {
       unsigned char r, g, b;
 
       //get the hsl value from source data
-      size_t data_loc = i * width + j;
-      float h = float(source_data[data_loc]) * 1.4117647f;   //is /255*360
-      data_loc += img_size;
-      float s = float(source_data[data_loc]) / 255.0f;
-      data_loc += img_size;
-      float l = float(source_data[data_loc]) / 255.0f;
+      size_t data_loc = i * kWidth + j;
+      float h = float(original[data_loc]) * 1.4117647f;   //is /255*360
+      data_loc += kImgSize;
+      float s = float(original[data_loc]) / 255.0f;
+      data_loc += kImgSize;
+      float l = float(original[data_loc]) / 255.0f;
 
-      float chroma = (1.0f - std::fabsf(2 * l - 1)) * s;
-      int sector = std::floor(h / 60.0f);
-      float x = chroma * (1.0f - std::fabsf(std::fmodf((h / 60.0f), 2) - 1.0f));
+      const float chroma = (1.0f - std::fabsf(2 * l - 1)) * s;
+      const int sector = std::floor(h / 60.0f);
+      const float x = chroma * (1.0f - std::fabsf(std::fmodf((h / 60.0f), 2) - 1.0f));
 
       unsigned char m = (unsigned char) (l - 0.5 * chroma);
       unsigned char c = (unsigned char) chroma;
@@ -412,159 +406,159 @@ void hsl_to_rgb(u8_image &_src, u8_image &_dst) {
           break;
       }
 
-      data_loc = i * width + j;
+      data_loc = i * kWidth + j;
       result[data_loc] = r;
-      data_loc += img_size;
+      data_loc += kImgSize;
       result[data_loc] = g;
-      data_loc += img_size;
+      data_loc += kImgSize;
       result[data_loc] = b;
     }
   }
 
-  _dst = u8_image(width, height, 3, Type_RGB, result);
+  dst = u8_image(kWidth, kHeight, 3, Type_RGB, result);
 }
 
-void rgb_to_yuv(u8_image &_src, u8_image &_dst) {
+void rgb2Yuv(u8_image& src, u8_image& dst) {
   //check image empty
-  if (_src.isEmpty()) {
-    std::cerr << "empty image in " << __FUNCTION__ << std::endl;
+  if (src.isEmpty()) {
+    std::cerr << "Source image empty in " << __FUNCTION__ << std::endl;
     return;
   }
 
   //check image type and channels
-  if (_src.color() != Type_RGB || _src.channels() != 3) {
+  if (src.color() != Type_RGB || src.channels() != 3) {
     std::cerr << "input color type not rgb in " << __FUNCTION__ << std::endl;
     return;
   }
 
-  size_t width = _src.width();
-  size_t height = _src.height();
-  size_t img_size = width * height;
-  unsigned char *source_data = _src.data();
-  unsigned char *result = (unsigned char *) malloc(img_size * 3);
+  const size_t& kWidth = src.width();
+  const size_t& kHeight = src.height();
+  const size_t kImgSize = kWidth * kHeight;
+  const unsigned char* const original = src.data();
+  unsigned char* const result = (unsigned char *) malloc(kImgSize * 3);
 
-  for (size_t i = 0; i < height; ++i) {
-    for (size_t j = 0; j < width; ++j) {
-      size_t data_loc = i * width + j;
-      unsigned char r = source_data[data_loc];
-      data_loc += img_size;
-      unsigned char g = source_data[data_loc];
-      data_loc += img_size;
-      unsigned char b = source_data[data_loc];
+  for (size_t i = 0; i < kHeight; ++i) {
+    for (size_t j = 0; j < kWidth; ++j) {
+      size_t data_loc = i * kWidth + j;
+      unsigned char r = original[data_loc];
+      data_loc += kImgSize;
+      unsigned char g = original[data_loc];
+      data_loc += kImgSize;
+      unsigned char b = original[data_loc];
 
       unsigned char y = 0.299f * r + 0.587f * g + 0.114f * b;
       unsigned char u = -0.14713f * r + -0.28886 * g + 0.436f * b;
       unsigned char v = 0.615f * r + -0.51499f * g + -0.10001f * b;
 
-      data_loc = i * width + j;
+      data_loc = i * kWidth + j;
       result[data_loc] = y;
-      data_loc += img_size;
+      data_loc += kImgSize;
       result[data_loc] = u;
-      data_loc += img_size;
+      data_loc += kImgSize;
       result[data_loc] = v;
     }
   }
 
-  _dst = u8_image(width, height, 3, Type_YUV444, result);
+  dst = u8_image(kWidth, kHeight, 3, Type_YUV444, result);
 }
 
-void yuv_to_rgb(u8_image &_src, u8_image &_dst) {
+void yuv2Rgb(u8_image& src, u8_image& dst) {
   //check image empty
-  if (_src.isEmpty()) {
-    std::cerr << "empty image in " << __FUNCTION__ << std::endl;
+  if (src.isEmpty()) {
+    std::cerr << "Source image empty in " << __FUNCTION__ << std::endl;
     return;
   }
 
   //check image channel and color type
-  if (_src.color() != Type_YUV444 || _src.channels() != 3) {
+  if (src.color() != Type_YUV444 || src.channels() != 3) {
     std::cerr << "input color type not hsv in " << __FUNCTION__ << std::endl;
     return;
   }
 
-  size_t width = _src.width();
-  size_t height = _src.height();
-  size_t img_size = width * height;
-  unsigned char *source_data = _src.data();
-  unsigned char *result = (unsigned char *) malloc(img_size * 3);
+  const size_t& kWidth = src.width();
+  const size_t& kHeight = src.height();
+  const size_t kImgSize = kWidth * kHeight;
+  const unsigned char* const original = src.data();
+  unsigned char* const result = (unsigned char*) malloc(kImgSize * 3);
 
-  for (size_t i = 0; i < height; ++i) {
-    for (size_t j = 0; j < width; ++j) {
-      size_t data_loc = i * width + j;
-      unsigned char y = source_data[data_loc];
-      data_loc += img_size;
-      unsigned char u = source_data[data_loc];
-      data_loc += img_size;
-      unsigned char v = source_data[data_loc];
+  for (size_t i = 0; i < kHeight; ++i) {
+    for (size_t j = 0; j < kWidth; ++j) {
+      size_t data_loc = i * kWidth + j;
+      unsigned char y = original[data_loc];
+      data_loc += kImgSize;
+      unsigned char u = original[data_loc];
+      data_loc += kImgSize;
+      unsigned char v = original[data_loc];
 
       unsigned char r = y + 1.13983f * v;
       unsigned char g = y + -0.39465f * u + -0.5806f * v;
       unsigned char b = y + 2.03211f * u;
 
-      data_loc = i * width + j;
+      data_loc = i * kWidth + j;
       result[data_loc] = r;
-      data_loc += img_size;
+      data_loc += kImgSize;
       result[data_loc] = g;
-      data_loc += img_size;
+      data_loc += kImgSize;
       result[data_loc] = b;
     }
   }
 
-  _dst = u8_image(width, height, 3, Type_RGB, result);
+  dst = u8_image(kWidth, kHeight, 3, Type_RGB, result);
 }
 
-void build_gamma_correction_LUT(unsigned char *table, float _gamma_correction) {
+void buildGammaCorrectionLUT(unsigned char *table, float _gamma_correction) {
   for (size_t i = 0; i < 256; ++i) {
     table[i] = (unsigned char) (255.0f * std::pow((float)i / 255.0f, _gamma_correction));
   }
 }
 
-void gamma_correction(u8_image &_src, u8_image &_dst, float _gamma) {
-  if (_src.isEmpty()) {
+void gammaCorrection(u8_image& src, u8_image& dst, float _gamma) {
+  if (src.isEmpty()) {
     std::cerr << "source image empty\n";
     return;
   }
 
   float gamma_correction = 1.0f / _gamma;
 
-  unsigned char *result = (unsigned char *) malloc(_src.channels() * _src.width()
-                                                       * _src.height() * sizeof(unsigned char));
+  unsigned char *result = (unsigned char *) malloc(src.channels() * src.width()
+                                                       * src.height());
 
-  size_t image_size = _src.width() * _src.height() * _src.channels();
+  size_t image_size = src.width() * src.height() * src.channels();
 
   for (size_t i = 0; i < image_size; ++i) {
-    result[i] = (unsigned char) (255.0f * std::pow(_src.data()[i] / 255.0f, gamma_correction));
+    result[i] = (unsigned char) (255.0f * std::pow(src.data()[i] / 255.0f, gamma_correction));
   }
 
-  _dst = u8_image(_src.width(), _src.height(), _src.channels(), _src.color(), result);
+  dst = u8_image(src.width(), src.height(), src.channels(), src.color(), result);
 }
 
-void gamma_correction_LUT(u8_image &_src, u8_image &_dst, float _gamma) {
-  if (_src.isEmpty()) {
+void gammaCorrectionLUT(u8_image& src, u8_image& dst, float _gamma) {
+  if (src.isEmpty()) {
     std::cerr << "source image empty\n";
     return;
   }
 
   float gamma_correction = 1.0f / _gamma;
 
-  size_t image_size = _src.width() * _src.height() * _src.channels();
+  size_t image_size = src.width() * src.height() * src.channels();
 
   unsigned char table[256];
 
-  build_gamma_correction_LUT(table, gamma_correction);
+  buildGammaCorrectionLUT(table, gamma_correction);
 
   unsigned char *result = (unsigned char *) malloc(image_size);
 
   for (size_t i = 0; i < image_size; ++i) {
-    result[i] = table[_src.data()[i]];
+    result[i] = table[src.data()[i]];
   }
 
-  _dst = u8_image(_src.width(), _src.height(), _src.channels(), _src.color(), result);
+  dst = u8_image(src.width(), src.height(), src.channels(), src.color(), result);
 }
 
-void increase_brightness(u8_image &_src,
-                         u8_image &_dst,
+void increaseBrightness(u8_image& src,
+                         u8_image& dst,
                          unsigned char _value) {
-  const size_t image_size = _src.width() * _src.height() * _src.channels();
+  const size_t image_size = src.width() * src.height() * src.channels();
 
   unsigned char *result = (unsigned char *) malloc(image_size);
 
@@ -572,7 +566,7 @@ void increase_brightness(u8_image &_src,
 
   size_t i;
   for (i = 0; i < (image_size - 16); i += 16) {
-    __m128i src_vec = _mm_loadu_si128((__m128i*) &_src.data()[i]);
+    __m128i src_vec = _mm_loadu_si128((__m128i*) &src.data()[i]);
     __m128i result_vec = _mm_adds_epu8(src_vec, value);
 
     unsigned char *res = (unsigned char *) &result_vec;
@@ -583,16 +577,16 @@ void increase_brightness(u8_image &_src,
   }
 
   for (; i < image_size; ++i) {
-    result[i] = _src.data()[i] + _value;
+    result[i] = src.data()[i] + _value;
   }
 
-  _dst = u8_image(_src.width(), _src.height(), _src.channels(), _src.color(), result);
+  dst = u8_image(src.width(), src.height(), src.channels(), src.color(), result);
 }
 
-void decrease_brightness(u8_image &_src,
-                         u8_image &_dst,
+void decreaseBrightness(u8_image& src,
+                         u8_image& dst,
                          unsigned char _value) {
-  const size_t image_size = _src.width() * _src.height() * _src.channels();
+  const size_t image_size = src.width() * src.height() * src.channels();
 
   unsigned char *result = (unsigned char *) malloc(image_size);
 
@@ -600,7 +594,7 @@ void decrease_brightness(u8_image &_src,
 
   size_t i;
   for (i = 0; i < (image_size - 16); i += 16) {
-    __m128i src_vec = _mm_loadu_si128((__m128i*) &_src.data()[i]);
+    __m128i src_vec = _mm_loadu_si128((__m128i*) &src.data()[i]);
     __m128i result_vec = _mm_subs_epu8(src_vec, value);
 
     unsigned char *res = (unsigned char *) &result_vec;
@@ -611,53 +605,53 @@ void decrease_brightness(u8_image &_src,
   }
 
   for (; i < image_size; ++i) {
-    result[i] = _src.data()[i] - _value;
+    result[i] = src.data()[i] - _value;
   }
 
-  _dst = u8_image(_src.width(), _src.height(), _src.channels(), _src.color(), result);
+  dst = u8_image(src.width(), src.height(), src.channels(), src.color(), result);
 }
 
-void  brightness_adjustment(u8_image &_src,
-                           u8_image &_dst,
+void  brightnessAdjustment(u8_image& src,
+                           u8_image& dst,
                            int _adjustment) {
-  if (_src.isEmpty()) {
+  if (src.isEmpty()) {
     std::cerr << "source image empty\n";
-    _dst = u8_image();
+    dst = u8_image();
     return;
   }
 
   if (_adjustment > 128 || _adjustment < -128) {
     std::cerr << "invalid brightness adjustment value\n";
-    _dst = u8_image();
+    dst = u8_image();
     return;
   }
 
-  if (_src.color() != Type_RGB && _src.channels() != 3) {
+  if (src.color() != Type_RGB && src.channels() != 3) {
     std::cerr << "image type must be rgb in " << __FUNCTION__ << "\n";
     return;
   }
 
   u8_image yuv_img;
-  rgb_to_yuv(_src, yuv_img);
+  rgb2Yuv(src, yuv_img);
 
-  size_t width = _src.width();
-  size_t height = _src.height();
+  size_t width = src.width();
+  size_t height = src.height();
   size_t img_size = width * height;
   unsigned char *source_data = yuv_img.data();
 }
 
-void contrast_adjustment(u8_image &_src,
-                         u8_image &_dst,
+void contrastAdjustment(u8_image& src,
+                         u8_image& dst,
                          int _adjustment) {
-  if (_src.isEmpty()) {
+  if (src.isEmpty()) {
     std::cerr << "source image empty\n";
-    _dst = u8_image();
+    dst = u8_image();
     return;
   }
 
   if (_adjustment > 255 || _adjustment < -255) {
     std::cerr << "invalid contrast adjustment value\n";
-    _dst = u8_image();
+    dst = u8_image();
     return;
   }
 
@@ -670,20 +664,20 @@ void contrast_adjustment(u8_image &_src,
     lut[i] = (unsigned char) std::max(std::min((int) (factor * (i - 128) + 128), 255), 0);
   }
 
-  size_t image_size = _src.width() * _src.height() * _src.channels();
+  size_t image_size = src.width() * src.height() * src.channels();
 
   unsigned char *result = (unsigned char *) malloc(image_size);
-  unsigned char *source = _src.data();
+  unsigned char *source = src.data();
 
   for (size_t j = 0; j < image_size; ++j) {
     result[j] = lut[source[j]];
   }
 
-  _dst = u8_image(_src.width(), _src.height(), _src.channels(), _src.color(), result);
+  dst = u8_image(src.width(), src.height(), src.channels(), src.color(), result);
 }
 
-bool white_balance_adjustment(u8_image &_src,
-                              u8_image &_dst,
+bool whiteBalanceAdjustment(u8_image& src,
+                              u8_image& dst,
                               int temperature) {
   //check temperature out of range
   if (temperature < 1000 || temperature > 20000) {
@@ -692,13 +686,13 @@ bool white_balance_adjustment(u8_image &_src,
   }
 
   //check image empty
-  if (_src.isEmpty()) {
+  if (src.isEmpty()) {
     std::cerr << "source image empty in " << __FUNCTION__ << std::endl;
     return false;
   }
 
   //image must be RGB type
-  if (_src.color() != qivon::Type_RGB) {
+  if (src.color() != qivon::Type_RGB) {
     std::cerr << "image must be RGB type in " << __FUNCTION__ << std::endl;
     return false;
   }
@@ -766,12 +760,12 @@ bool white_balance_adjustment(u8_image &_src,
     b_lut[i] = (unsigned char) ((float) i * blue_ratio);
   }
 
-  size_t width = _src.width();
-  size_t height = _src.height();
+  size_t width = src.width();
+  size_t height = src.height();
   size_t img_size = width * height;
-  unsigned char *source_data = _src.data();
+  unsigned char *source_data = src.data();
 
-  unsigned char *result = (unsigned char*) malloc(img_size * _src.channels());
+  unsigned char *result = (unsigned char*) malloc(img_size * src.channels());
 
   for (size_t i = 0; i < height; ++i) {
     for (size_t j = 0; j < width; ++j) {
@@ -781,14 +775,14 @@ bool white_balance_adjustment(u8_image &_src,
     }
   }
 
-  _dst = qivon::u8_image(width, height, _src.channels(), _src.color(), result);
+  dst = qivon::u8_image(width, height, src.channels(), src.color(), result);
 
   return true;
 }
 
-bool hue_adjustment(u8_image &_src, u8_image &_dst, int _value) {
+bool hueAdjustment(u8_image& src, u8_image& dst, int _value) {
   //check source image empty
-  if (_src.isEmpty()) {
+  if (src.isEmpty()) {
     std::cerr << "source image empty in " << __FUNCTION__ << std::endl;
     return false;
   }
@@ -800,22 +794,22 @@ bool hue_adjustment(u8_image &_src, u8_image &_dst, int _value) {
   }
 
   //check image type
-  if (_src.color() != qivon::Type_HSV && _src.color() != qivon::Type_RGB
-      && _src.channels() != 3) {
+  if (src.color() != qivon::Type_HSV && src.color() != qivon::Type_RGB
+      && src.channels() != 3) {
     std::cerr << "image type must be hsv or rgb in " << __FUNCTION__ << std::endl;
     return false;
   }
 
   u8_image hsv_img;
-  if (_src.color() == qivon::Type_HSV)
-    hsv_img = _src;
+  if (src.color() == qivon::Type_HSV)
+    hsv_img = src;
   else {
     //if it's not hsv type, convert it to hsv from rgb
-    rgb_to_hsv(_src, hsv_img);
+    rgb2Hsv(src, hsv_img);
   }
 
-  size_t width = _src.width();
-  size_t height = _src.height();
+  size_t width = src.width();
+  size_t height = src.height();
   size_t img_size = width * height;
   unsigned char *source_data = hsv_img.data();
   int hue_change = (int) (float(_value) * 1.28f);
@@ -861,19 +855,19 @@ bool hue_adjustment(u8_image &_src, u8_image &_dst, int _value) {
     }
   }*/
 
-  if (_src.color() == Type_HSV)
-    _dst = u8_image(width, height, 3, Type_HSV, result);
+  if (src.color() == Type_HSV)
+    dst = u8_image(width, height, 3, Type_HSV, result);
   else {
     u8_image hsv_result = u8_image(width, height, 3, Type_HSV, result);
-    hsv_to_rgb(hsv_result, _dst);
+    hsv2Rgb(hsv_result, dst);
   }
 
   return true;
 }
 
-bool saturation_adjustment(u8_image &_src, u8_image &_dst, int _value) {
+bool saturationAdjustment(u8_image& src, u8_image& dst, int _value) {
   //check image empty
-  if (_src.isEmpty()) {
+  if (src.isEmpty()) {
     std::cerr << "source image empty in " << __FUNCTION__ << std::endl;
     return false;
   }
@@ -885,20 +879,20 @@ bool saturation_adjustment(u8_image &_src, u8_image &_dst, int _value) {
   }
 
   //check color type and channel
-  if (_src.color() != Type_HSV && _src.color() != Type_RGB
-      && _src.channels() != 3) {
+  if (src.color() != Type_HSV && src.color() != Type_RGB
+      && src.channels() != 3) {
     std::cerr << "image type must be hsv or rgb in " << __FUNCTION__ << std::endl;
     return false;
   }
 
   u8_image hsv_img;
-  if (_src.color() == Type_HSV)
-    hsv_img = _src;
+  if (src.color() == Type_HSV)
+    hsv_img = src;
   else
-    rgb_to_hsv(_src, hsv_img);
+    rgb2Hsv(src, hsv_img);
 
-  size_t width = _src.width();
-  size_t height = _src.height();
+  size_t width = src.width();
+  size_t height = src.height();
   size_t img_size = width * height;
   unsigned char *source_data = hsv_img.data();
   int saturation_change = (int) ((float)_value * 1.28f);
@@ -928,11 +922,11 @@ bool saturation_adjustment(u8_image &_src, u8_image &_dst, int _value) {
     }
   }
 
-  if (_src.color() == Type_HSV)
-    _dst = qivon::u8_image(width, height, 3, Type_HSV, result);
+  if (src.color() == Type_HSV)
+    dst = qivon::u8_image(width, height, 3, Type_HSV, result);
   else {
     u8_image hsv_result = u8_image(width, height, 3, Type_HSV, result);
-    hsv_to_rgb(hsv_result, _dst);
+    hsv2Rgb(hsv_result, dst);
   }
 
   return true;

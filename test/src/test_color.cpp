@@ -73,7 +73,7 @@ bool test_gamma_correction(qivon::Image<unsigned char> &_src, float _gamma, size
   set_start_now();
 
   for (size_t i = 0; i < _run_time; ++i)
-    qivon::gamma_correction_LUT(_src, gamma, _gamma);
+    qivon::gammaCorrectionLUT(_src, gamma, _gamma);
 
   std::cout << __FUNCTION__ << " time " << get_elapsed_time() / _run_time << " ms\n";
 
@@ -92,7 +92,7 @@ bool test_brightness_adjustment(qivon::Image<unsigned char> &_src, int _adjustme
   set_start_now();
 
   for (size_t i = 0; i < _run_time; ++i)
-    qivon::brightness_adjustment(_src, brightness, _adjustment);
+    qivon::brightnessAdjustment(_src, brightness, _adjustment);
 
   std::cout << __FUNCTION__ << " time " << get_elapsed_time() / _run_time << " ms\n";
 
@@ -111,7 +111,7 @@ bool test_contrast_adjustment(qivon::Image<unsigned char> &_src, int _adjustment
   set_start_now();
 
   for (size_t i = 0; i < _run_time; ++i)
-    qivon::contrast_adjustment(_src, contrast, _adjustment);
+    qivon::contrastAdjustment(_src, contrast, _adjustment);
 
   std::cout << __FUNCTION__ << " time " << get_elapsed_time() / _run_time << " ms\n";
 
@@ -130,7 +130,7 @@ bool test_white_balance_adjustment(qivon::Image<unsigned char> &_src, int _adjus
   set_start_now();
 
   for (size_t i = 0; i < _run_time; ++i)
-    qivon::white_balance_adjustment(_src, wb, _adjustment);
+    qivon::whiteBalanceAdjustment(_src, wb, _adjustment);
 
   std::cout << __FUNCTION__ << " time " << get_elapsed_time() / _run_time << " ms\n";
 
@@ -149,7 +149,7 @@ bool test_hue_adjustment(qivon::Image<unsigned char> &_src, int _value, size_t _
   set_start_now();
 
   for (size_t i = 0; i < _run_time; ++i)
-    qivon::hue_adjustment(_src, hue, _value);
+    qivon::hueAdjustment(_src, hue, _value);
 
   std::cout << __FUNCTION__ << " time " << get_elapsed_time() / _run_time << " ms\n";
 
@@ -168,7 +168,7 @@ bool test_saturation_adjustment(qivon::Image<unsigned char> &_src, int _value, s
   set_start_now();
 
   for (size_t i = 0; i < _run_time; ++i)
-    qivon::saturation_adjustment(_src, saturation, _value);
+    qivon::saturationAdjustment(_src, saturation, _value);
 
   std::cout << __FUNCTION__ << " time " << get_elapsed_time() / _run_time << " ms\n";
 
