@@ -126,6 +126,11 @@ int main(int argc, char *argv[]) {
   update_test_counter(rst);
   print_test_result("test_bgr_to_rgb", rst);
 
+  //test convert rgb to yuv then back to rgb
+  rst = testRgb2Yuv2Rgb(img, run_time);
+  update_test_counter(rst);
+  print_test_result("test_rgb_yuv_rgb", rst);
+
   /*
   //test gamma correction
   rst = test_gamma_correction(img, 1.5, run_time);

@@ -64,6 +64,39 @@ bool test_bgr_to_rgb(qivon::Image<unsigned char> &_src, size_t _run_time) {
     return qivon::writePngFile("bgr_to_rgb.png", rgb);
 }
 
+bool testRgb2Yuv2Rgb(qivon::Image<unsigned char>& src, size_t run_time) {
+  if (src.isEmpty()) {
+    return false;
+  }
+
+  qivon::Image<unsigned char> yuv;
+  qivon::Image<unsigned char> result;
+
+  set_start_now();
+
+  for (size_t i = 0; i < run_time; ++i) {
+    qivon::rgb2Yuv(src, yuv);
+  }
+
+  std::cout << __FUNCTION__ << " rgb to yuv time: " << get_elapsed_time() / run_time << " ms\n";
+
+  if (yuv.isEmpty())
+    return false;
+
+  set_start_now();
+
+  for (size_t i = 0; i < run_time; ++i) {
+    qivon::yuv2Rgb(yuv, result);
+  }
+
+  std::cout << __FUNCTION__ << " yuv to rgb time: " << get_elapsed_time() / run_time << " ms\n";
+
+  if (result.isEmpty())
+    return false;
+  else
+    return qivon::writePngFile("rgb2yuv2rgb.png", result);
+}
+
 bool test_gamma_correction(qivon::Image<unsigned char> &_src, float _gamma, size_t _run_time) {
   if (_src.isEmpty())
     return false;

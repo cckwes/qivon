@@ -10,6 +10,8 @@ bool test_rgb_to_bgr(qivon::Image<unsigned char> &_src, size_t _run_time = 1);
 
 bool test_bgr_to_rgb(qivon::Image<unsigned char> &_src, size_t _run_time = 1);
 
+bool testRgb2Yuv2Rgb(qivon::Image<unsigned char>& src, size_t run_time = 1);
+
 bool test_gamma_correction(qivon::Image<unsigned char> &_src, float _gamma, size_t _run_time = 1);
 
 bool test_brightness_adjustment(qivon::Image<unsigned char> &_src, int _adjustment, size_t _run_time = 1);

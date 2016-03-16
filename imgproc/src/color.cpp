@@ -144,9 +144,10 @@ void rgb2Hsv(u8_image& src, u8_image& dst) {
 
   for (size_t i = 0; i < kHeight; ++i) {
     for (size_t j = 0; j < kWidth; ++j) {
-      float r = float(original[i * kWidth + j]) / 255.0f;
-      float g = float(original[i * kWidth + j + kImgSize]) / 255.0f;
-      float b = float(original[i * kWidth + j + 2 * kImgSize]) / 255.0f;
+      const size_t pixel_position = i * kWidth + j;
+      float r = float(original[pixel_position]) / 255.0f;
+      float g = float(original[pixel_position + kImgSize]) / 255.0f;
+      float b = float(original[pixel_position + 2 * kImgSize]) / 255.0f;
 
       float min = std::min(r, std::min(g, b));
       float max = std::max(r, std::max(g, b));
@@ -174,9 +175,9 @@ void rgb2Hsv(u8_image& src, u8_image& dst) {
       unsigned char s = (max == 0) ? 0 : (unsigned char) ((delta / max) * 255.0f);
 
       //put HSV value into result buffer
-      result[i * kWidth + j] = h;
-      result[i * kWidth + j + kImgSize] = s;
-      result[i * kWidth + j + 2 * kImgSize] = v;
+      result[pixel_position] = h;
+      result[pixel_position + kImgSize] = s;
+      result[pixel_position + 2 * kImgSize] = v;
     }
   }
 
@@ -205,9 +206,10 @@ void hsv2Rgb(u8_image& src, u8_image& dst) {
 
   for (size_t i = 0; i < kHeight; ++i) {
     for (size_t j = 0; j < kWidth; ++j) {
-      float h = float(original[i * kWidth + j]) * 1.4117647f;   //is /255*360
-      float s = float(original[i * kWidth + j + kImgSize]) / 255.0f;
-      float v = float(original[i * kWidth + j + 2 * kImgSize]) / 255.0f;
+      const size_t pixel_position = i * kWidth + j;
+      float h = float(original[pixel_position]) * 1.4117647f;   //is /255*360
+      float s = float(original[pixel_position + kImgSize]) / 255.0f;
+      float v = float(original[pixel_position + 2 * kImgSize]) / 255.0f;
 
       unsigned char r, g, b;
       if (s == 0) {
@@ -258,9 +260,9 @@ void hsv2Rgb(u8_image& src, u8_image& dst) {
         }
       }
 
-      result[i * kWidth + j] = r;
-      result[i * kWidth + j + kImgSize] = g;
-      result[i * kWidth + j + 2 * kImgSize] = b;
+      result[pixel_position] = r;
+      result[pixel_position + kImgSize] = g;
+      result[pixel_position + 2 * kImgSize] = b;
     }
   }
 
@@ -288,9 +290,10 @@ void rgb2Hsl(u8_image& src, u8_image& dst) {
 
   for (size_t i = 0; i < kHeight; ++i) {
     for (size_t j = 0; j < kWidth; ++j) {
-      float r = float(original[i * kWidth + j]) / 255.0f;
-      float g = float(original[i * kWidth + j + kImgSize]) / 255.0f;
-      float b = float(original[i * kWidth + j + 2 * kImgSize]) / 255.0f;
+      const size_t pixel_position = i * kWidth + j;
+      float r = float(original[pixel_position]) / 255.0f;
+      float g = float(original[pixel_position + kImgSize]) / 255.0f;
+      float b = float(original[pixel_position + 2 * kImgSize]) / 255.0f;
 
       float min = std::min(r, std::min(g, b));
       float max = std::max(r, std::max(g, b));
@@ -317,7 +320,7 @@ void rgb2Hsl(u8_image& src, u8_image& dst) {
       unsigned char h = (unsigned char) f_h / 360.0f * 255.0f;
 
       //put HSL into result buffer
-      size_t data_loc = i * kWidth + j;
+      size_t data_loc = pixel_position;
       result[data_loc] = h;
       data_loc += kImgSize;
       result[data_loc] = s;
@@ -431,6 +434,33 @@ void rgb2Yuv(u8_image& src, u8_image& dst) {
     return;
   }
 
+  static bool lut_init = false;
+  static std::vector<float> container;
+  static const int kNumCoefficients = 9;
+  static const float coefficients[kNumCoefficients] = {0.257f, -0.148f, 0.439f,
+                                                       0.504f, -0.291f, -0.368f,
+                                                       0.098f, 0.439f, -0.071f};
+
+  if (!lut_init) {
+    const int kFactor = 1 << 12;
+    container.clear();
+    container.resize(kNumCoefficients * 256);
+
+    std::vector<int> i_coefficients;
+    i_coefficients.resize(kNumCoefficients);
+    for (int i = 0; i < kNumCoefficients; ++i) {
+      i_coefficients[i] = (int) (coefficients[i] * kFactor + 0.5);
+    }
+
+    //initialize the LUT values
+    for (int i = 0; i < 256; ++i) {
+      for (int j = 0; j < kNumCoefficients; ++j) {
+        container[i + j * 256] = (i_coefficients[j] * i) >> 12;
+      }
+    }
+    lut_init = true;
+  }
+
   const size_t& kWidth = src.width();
   const size_t& kHeight = src.height();
   const size_t kImgSize = kWidth * kHeight;
@@ -446,9 +476,12 @@ void rgb2Yuv(u8_image& src, u8_image& dst) {
       data_loc += kImgSize;
       unsigned char b = original[data_loc];
 
-      unsigned char y = 0.299f * r + 0.587f * g + 0.114f * b;
-      unsigned char u = -0.14713f * r + -0.28886 * g + 0.436f * b;
-      unsigned char v = 0.615f * r + -0.51499f * g + -0.10001f * b;
+      unsigned char y = std::max(16, std::min(235, (int)
+          (container[r] + container[g + 3 * 256] + container[b + 6 * 256] + 16)));
+      unsigned char u = std::max(16, std::min(240, (int)
+          (container[r + 256] + container[g + 4 * 256] + container[b + 7 * 256] + 128)));
+      unsigned char v = std::max(16, std::min(240, (int)
+          (container[r + 2 * 256] + container[g + 5 * 256] + container[b + 8 * 256] + 128)));
 
       data_loc = i * kWidth + j;
       result[data_loc] = y;
@@ -475,6 +508,46 @@ void yuv2Rgb(u8_image& src, u8_image& dst) {
     return;
   }
 
+  static bool lut_init = false;
+  static std::vector<short> container;
+  static const int kNumCoefficients = 5;
+  static const float coefficients[kNumCoefficients] = {1.164f, 1.596f, -0.391f,
+                                                       -0.813f, 2.018f};
+
+  if (!lut_init) {
+    const int kFactor = 1 << 12;
+    container.clear();
+    container.resize(kNumCoefficients * 256);
+
+    std::vector<int> i_coefficients;
+    i_coefficients.resize(kNumCoefficients);
+    for (int i = 0; i < kNumCoefficients; ++i) {
+      i_coefficients[i] = (int) (coefficients[i] * kFactor + 0.5);
+    }
+
+    //initialize the LUT values
+    for (int i = 0; i < 256; ++i) {
+      for (int j = 0; j < kNumCoefficients; ++j) {
+        short res_val;
+
+        if (j == 0) {
+          if (i <= 16)
+            res_val = 0;
+          else
+            res_val = ((i - 16) * i_coefficients[j]) >> 12;
+        } else {
+          if (i <= 128)
+            res_val = 0;
+          else
+            res_val = ((i - 128) * i_coefficients[j]) >> 12;
+        }
+
+        container[i + j * 256] = res_val;
+      }
+    }
+    lut_init = true;
+  }
+
   const size_t& kWidth = src.width();
   const size_t& kHeight = src.height();
   const size_t kImgSize = kWidth * kHeight;
@@ -490,9 +563,12 @@ void yuv2Rgb(u8_image& src, u8_image& dst) {
       data_loc += kImgSize;
       unsigned char v = original[data_loc];
 
-      unsigned char r = y + 1.13983f * v;
-      unsigned char g = y + -0.39465f * u + -0.5806f * v;
-      unsigned char b = y + 2.03211f * u;
+      unsigned char r = std::max(0,std::min(255, (int)
+          (container[y] + container[v + 256])));
+      unsigned char g = std::max(0,std::min(255, (int)
+          (container[y] + container[u + 2 * 256] + container[v + 3 * 256])));
+      unsigned char b = std::max(0,std::min(255, (int)
+          (container[y] + container[u + 4 * 256])));
 
       data_loc = i * kWidth + j;
       result[data_loc] = r;
