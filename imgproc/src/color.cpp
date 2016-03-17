@@ -442,20 +442,13 @@ void rgb2Yuv(u8_image& src, u8_image& dst) {
                                                        0.098f, 0.439f, -0.071f};
 
   if (!lut_init) {
-    const int kFactor = 1 << 12;
     container.clear();
     container.resize(kNumCoefficients * 256);
-
-    std::vector<int> i_coefficients;
-    i_coefficients.resize(kNumCoefficients);
-    for (int i = 0; i < kNumCoefficients; ++i) {
-      i_coefficients[i] = (int) (coefficients[i] * kFactor + 0.5);
-    }
 
     //initialize the LUT values
     for (int i = 0; i < 256; ++i) {
       for (int j = 0; j < kNumCoefficients; ++j) {
-        container[i + j * 256] = (i_coefficients[j] * i) >> 12;
+        container[i + j * 256] = coefficients[j] * i;
       }
     }
     lut_init = true;
@@ -509,37 +502,30 @@ void yuv2Rgb(u8_image& src, u8_image& dst) {
   }
 
   static bool lut_init = false;
-  static std::vector<short> container;
+  static std::vector<float> container;
   static const int kNumCoefficients = 5;
   static const float coefficients[kNumCoefficients] = {1.164f, 1.596f, -0.391f,
                                                        -0.813f, 2.018f};
 
   if (!lut_init) {
-    const int kFactor = 1 << 12;
     container.clear();
     container.resize(kNumCoefficients * 256);
-
-    std::vector<int> i_coefficients;
-    i_coefficients.resize(kNumCoefficients);
-    for (int i = 0; i < kNumCoefficients; ++i) {
-      i_coefficients[i] = (int) (coefficients[i] * kFactor + 0.5);
-    }
 
     //initialize the LUT values
     for (int i = 0; i < 256; ++i) {
       for (int j = 0; j < kNumCoefficients; ++j) {
-        short res_val;
+        float res_val;
 
         if (j == 0) {
           if (i <= 16)
             res_val = 0;
           else
-            res_val = ((i - 16) * i_coefficients[j]) >> 12;
+            res_val = ((i - 16) * coefficients[j]);
         } else {
           if (i <= 128)
             res_val = 0;
           else
-            res_val = ((i - 128) * i_coefficients[j]) >> 12;
+            res_val = ((i - 128) * coefficients[j]);
         }
 
         container[i + j * 256] = res_val;
