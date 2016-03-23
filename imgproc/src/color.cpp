@@ -568,9 +568,9 @@ void yuv2Rgb(u8_image& src, u8_image& dst) {
   dst = u8_image(kWidth, kHeight, 3, Type_RGB, result);
 }
 
-void buildGammaCorrectionLUT(unsigned char *table, float _gamma_correction) {
+void buildGammaCorrectionLUT(unsigned char *table, const float gamma_correction) {
   for (size_t i = 0; i < 256; ++i) {
-    table[i] = (unsigned char) (255.0f * std::pow((float)i / 255.0f, _gamma_correction));
+    table[i] = (unsigned char) (255.0f * std::pow((float)i / 255.0f, gamma_correction));
   }
 }
 
@@ -600,18 +600,19 @@ void gammaCorrectionLUT(u8_image& src, u8_image& dst, float _gamma) {
     return;
   }
 
-  float gamma_correction = 1.0f / _gamma;
+  const float kGammaCorrection = 1.0f / _gamma;
 
-  size_t image_size = src.width() * src.height() * src.channels();
+  const size_t kImgSize = src.width() * src.height() * src.channels();
 
   unsigned char table[256];
 
-  buildGammaCorrectionLUT(table, gamma_correction);
+  buildGammaCorrectionLUT(table, kGammaCorrection);
 
-  unsigned char *result = (unsigned char *) malloc(image_size);
+  const unsigned char* const original = src.data();
+  unsigned char* const result = (unsigned char*) malloc(kImgSize);
 
-  for (size_t i = 0; i < image_size; ++i) {
-    result[i] = table[src.data()[i]];
+  for (size_t i = 0; i < kImgSize; ++i) {
+    result[i] = table[original[i]];
   }
 
   dst = u8_image(src.width(), src.height(), src.channels(), src.color(), result);
