@@ -131,16 +131,16 @@ int main(int argc, char *argv[]) {
   update_test_counter(rst);
   print_test_result("test_rgb_yuv_rgb", rst);
 
+  //test brightness adjustment
+  rst = test_brightness_adjustment(img, 50, run_time);
+  update_test_counter(rst);
+  print_test_result("test_brightness_adjustment", rst);
+
   /*
   //test gamma correction
   rst = test_gamma_correction(img, 1.5, run_time);
   update_test_counter(rst);
   print_test_result("test_gamma_correction", rst);
-
-  //test brightness adjustment
-  rst = test_brightness_adjustment(img, 50, run_time);
-  update_test_counter(rst);
-  print_test_result("test_brightness_adjustment", rst);
 
   //test contrast adjustment
   rst = test_contrast_adjustment(img, 110, run_time);

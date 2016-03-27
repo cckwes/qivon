@@ -116,8 +116,8 @@ bool test_gamma_correction(qivon::Image<unsigned char> &_src, float _gamma, size
     return qivon::writePngFile("gamma.png", gamma);
 }
 
-bool test_brightness_adjustment(qivon::Image<unsigned char> &_src, int _adjustment, size_t _run_time) {
-  if (_src.isEmpty())
+bool test_brightness_adjustment(qivon::Image<unsigned char> &src, int adjustment, size_t _run_time) {
+  if (src.isEmpty())
     return false;
 
   qivon::Image<unsigned char> brightness;
@@ -125,7 +125,7 @@ bool test_brightness_adjustment(qivon::Image<unsigned char> &_src, int _adjustme
   set_start_now();
 
   for (size_t i = 0; i < _run_time; ++i)
-    qivon::brightnessAdjustment(_src, brightness, _adjustment);
+    qivon::brightnessAdjustment(src, brightness, adjustment);
 
   std::cout << __FUNCTION__ << " time " << get_elapsed_time() / _run_time << " ms\n";
 

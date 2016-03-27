@@ -620,27 +620,28 @@ void gammaCorrectionLUT(u8_image& src, u8_image& dst, float _gamma) {
 
 void increaseBrightness(u8_image& src,
                          u8_image& dst,
-                         unsigned char _value) {
-  const size_t image_size = src.width() * src.height() * src.channels();
+                         unsigned char bValue) {
+  const size_t kImgSize = src.width() * src.height() * src.channels();
 
-  unsigned char *result = (unsigned char *) malloc(image_size);
+  unsigned char* const result = (unsigned char*) malloc(kImgSize);
+  const unsigned char* const original = src.data();
 
-  __m128i value = _mm_set1_epi8(_value);
+  __m128i value = _mm_set1_epi8(bValue);
 
   size_t i;
-  for (i = 0; i < (image_size - 16); i += 16) {
-    __m128i src_vec = _mm_loadu_si128((__m128i*) &src.data()[i]);
+  for (i = 0; i < (kImgSize - 16); i += 16) {
+    __m128i src_vec = _mm_loadu_si128((__m128i*) &original[i]);
     __m128i result_vec = _mm_adds_epu8(src_vec, value);
 
-    unsigned char *res = (unsigned char *) &result_vec;
+    const unsigned char* res = (unsigned char*) &result_vec;
 
     for (size_t j = 0; j < 16; ++j) {
       result[i + j] = res[j];
     }
   }
 
-  for (; i < image_size; ++i) {
-    result[i] = src.data()[i] + _value;
+  for (; i < kImgSize; ++i) {
+    result[i] = original[i] + bValue;
   }
 
   dst = u8_image(src.width(), src.height(), src.channels(), src.color(), result);
@@ -648,27 +649,28 @@ void increaseBrightness(u8_image& src,
 
 void decreaseBrightness(u8_image& src,
                          u8_image& dst,
-                         unsigned char _value) {
-  const size_t image_size = src.width() * src.height() * src.channels();
+                         unsigned char bValue) {
+  const size_t kImgSize = src.width() * src.height() * src.channels();
 
-  unsigned char *result = (unsigned char *) malloc(image_size);
+  unsigned char* const result = (unsigned char*) malloc(kImgSize);
+  const unsigned char* const original = src.data();
 
-  __m128i value = _mm_set1_epi8(_value);
+  __m128i value = _mm_set1_epi8(bValue);
 
   size_t i;
-  for (i = 0; i < (image_size - 16); i += 16) {
-    __m128i src_vec = _mm_loadu_si128((__m128i*) &src.data()[i]);
+  for (i = 0; i < (kImgSize - 16); i += 16) {
+    __m128i src_vec = _mm_loadu_si128((__m128i*) &original[i]);
     __m128i result_vec = _mm_subs_epu8(src_vec, value);
 
-    unsigned char *res = (unsigned char *) &result_vec;
+    const unsigned char* res = (unsigned char*) &result_vec;
 
     for (size_t j = 0; j < 16; ++j) {
       result[i + j] = res[j];
     }
   }
 
-  for (; i < image_size; ++i) {
-    result[i] = src.data()[i] - _value;
+  for (; i < kImgSize; ++i) {
+    result[i] = original[i] - bValue;
   }
 
   dst = u8_image(src.width(), src.height(), src.channels(), src.color(), result);
@@ -676,31 +678,62 @@ void decreaseBrightness(u8_image& src,
 
 void  brightnessAdjustment(u8_image& src,
                            u8_image& dst,
-                           int _adjustment) {
+                           int adjustment) {
   if (src.isEmpty()) {
-    std::cerr << "source image empty\n";
+    std::cerr << "Source image empty\n";
     dst = u8_image();
     return;
   }
 
-  if (_adjustment > 128 || _adjustment < -128) {
-    std::cerr << "invalid brightness adjustment value\n";
+  if (adjustment > 100 || adjustment < -100) {
+    std::cerr << "Invalid brightness adjustment value, [-100,100]\n";
     dst = u8_image();
     return;
   }
 
   if (src.color() != Type_RGB && src.channels() != 3) {
-    std::cerr << "image type must be rgb in " << __FUNCTION__ << "\n";
+    std::cerr << "Image type must be rgb in " << __FUNCTION__ << "\n";
     return;
   }
 
   u8_image yuv_img;
   rgb2Yuv(src, yuv_img);
 
-  size_t width = src.width();
-  size_t height = src.height();
-  size_t img_size = width * height;
-  unsigned char *source_data = yuv_img.data();
+  const size_t& kWidth = src.width();
+  const size_t& kHeight = src.height();
+  const size_t kImgSize = kWidth * kHeight;
+  unsigned char* const original = yuv_img.data();
+
+  const int bValue = std::abs(adjustment) * 1.28f;
+  bool is_add = adjustment > 0;
+
+  __m128i value = _mm_set1_epi8(bValue);
+
+  size_t i;
+  for (i = 0; i < (kImgSize - 16); i += 16) {
+    __m128i src_vec = _mm_loadu_si128((__m128i*) &original[i]);
+    __m128i result_vec;
+
+    if (is_add)
+      result_vec = _mm_adds_epu8(src_vec, value);
+    else
+      result_vec = _mm_subs_epu8(src_vec, value);
+
+    const unsigned char* res = (unsigned char*) &result_vec;
+
+    for (size_t j = 0; j < 16; ++j) {
+      original[i + j] = res[j];
+    }
+  }
+
+  for (; i < kImgSize; ++i) {
+    if (is_add)
+      original[i] = original[i] + bValue;
+    else
+      original[i] = original[i] - bValue;
+  }
+
+  yuv2Rgb(yuv_img, dst);
 }
 
 void contrastAdjustment(u8_image& src,
